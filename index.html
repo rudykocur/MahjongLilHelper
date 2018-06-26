@@ -1,0 +1,141 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Mahjong Lil Helper</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/foundation-sites@6.4.3/dist/css/foundation.min.css" integrity="sha256-GSio8qamaXapM8Fq9JYdGNTvk/dgs+cMLgPeevOYEx0= sha384-wAweiGTn38CY2DSwAaEffed6iMeflc0FMiuptanbN4J+ib+342gKGpvYRWubPd/+ sha512-QHEb6jOC8SaGTmYmGU19u2FhIfeG+t/hSacIWPpDzOp5yygnthL3JwnilM7LM1dOAbJv62R+/FICfsrKUqv4Gg==" crossorigin="anonymous">
+
+    <script type="module" src="js/app.mjs"></script>
+
+    <style>
+        table td, table th {
+            padding: 2px 4px;
+        }
+
+        table tr th:nth-child(5),
+        table tr td:nth-child(5) {
+            border-right: solid 3px black
+        }
+
+        table tr:nth-child(2n) td {
+            background-color: #e6e6e6;
+        }
+        
+        table .tableHeader th {
+            text-align: center;
+        }
+
+        table thead td {
+            text-align: right;
+        }
+
+        .suitGroups li,
+        .handContent li {
+            display: inline-block;
+
+            margin: 0 3px;
+        }
+
+        .suitGroups li {
+            border: solid 1px gray;
+        }
+
+        .handContent ul {
+            display: inline-block;
+            padding: 0 3px;
+            border: solid 1px gray;
+            margin: 3px;
+        }
+
+        .handContent .revealedSet {
+            background: #ececec;
+        }
+
+        .suitGroups ul {
+            margin: 2px;
+            padding: 0;
+        }
+
+        .suitGroups li.selected {
+            background: #bff8ad;
+        }
+
+        .finishHandSection label {
+            display: block;
+        }
+
+        img.tile {
+            width: 3rem;
+            display: block;
+            padding: 3px;
+        }
+
+        #handCreator {
+            display: none;
+        }
+
+        [data-mode="handCreator"] table {
+            display: none;
+        }
+
+        [data-mode="handCreator"] #handCreator {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<H1>Henlo!</H1>
+<div id="mahjongContent">
+    <table cellspacing="0" cellpadding="0">
+        <thead>
+        <tr class="tableHeader">
+            <th></th>
+            <th colspan="4">Punktacja rundy</th>
+            <th colspan="4">Punktacja łączna</th>
+        </tr>
+        <tr>
+            <th>Runda</th>
+            <th>Grzesiek</th>
+            <th>Wojtek</th>
+            <th>Gosia</th>
+            <th>Ola</th>
+            <th>Grzesiek</th>
+            <th>Wojtek</th>
+            <th>Gosia</th>
+            <th>Ola</th>
+        </tr>
+        </thead>
+    </table>
+
+    <form id="handCreator">
+        <h2>Składanie ręki: <span data-slot="playerName"></span>, runda <span data-slot="roundNumber"></span></h2>
+        <div class="suitGroups"></div>
+        <div>
+            <fieldset>
+                Układ:
+                <input id="setRevealed" type="radio" name="revealed" checked value="1"> <label for="setRevealed">Odkryty</label>
+                <input id="setConcealed" type="radio" name="revealed" value=""> <label for="setConcealed">Zakryty</label>
+            </fieldset>
+
+            <button class="button small" data-action="addPair">Para</button>
+            <button class="button small" data-action="addChow">Chow</button>
+            <button class="button small" data-action="addPung">Pung</button>
+            <button class="button small" data-action="addKong">Kong</button>
+            <button class="button small" data-action="addTiles">Luźne kamienie</button>
+        </div>
+        <div class="handContent"></div>
+        <div class="finishHandSection">
+            <label><input name="isWinner" type="checkbox"> Mahjong</label>
+            <label><input name="lastTileFromWall" type="checkbox"> Ostatni kamień z muru</label>
+            <label><input name="lastTileSpecial" type="checkbox"> Zwycięstwo z dna morza/rzeki/na dachu</label>
+            <label><input name="lastAvailableTile" type="checkbox"> Majhong ostatnim możliwym kamieniem</label>
+            <button class="button small" data-action="finishHand">Zakończ tworzenie ręki</button>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>
