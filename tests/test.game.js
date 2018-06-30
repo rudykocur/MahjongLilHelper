@@ -1,6 +1,8 @@
 import * as h from '../js/hand.js';
 import * as g from '../js/game.js';
 
+const chai = require('chai');
+
 function createGame() {
     return new g.Game(new g.Player(0, 'P1'), new g.Player(1, 'P2'), new g.Player(2, 'P3'), new g.Player(3, 'P4'));
 }

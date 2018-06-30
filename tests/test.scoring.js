@@ -1,3 +1,5 @@
+const chai = require('chai');
+
 import * as s from '../js/scoring.js';
 import * as g from '../js/game.js';
 import * as h from '../js/hand.js';

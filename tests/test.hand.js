@@ -1,3 +1,5 @@
+const chai = require('chai');
+
 import * as hand from '../js/hand.js';
 
 describe('hand tests', () => {
