@@ -16,6 +16,8 @@
     "gulp-babel": "^7.0.1",
     "gulp-mocha": "^6.0.0",
     "jest": "^23.1.0",
-    "mocha": "^5.2.0"
+    "jsdom": "^11.11.0",
+    "mocha": "^5.2.0",
+    "mocha-jsdom": "^2.0.0"
   }
 }

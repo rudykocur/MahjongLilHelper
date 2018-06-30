@@ -1,4 +1,4 @@
-import {Hand, Suits, Pung, Kong, Chow, Pair, TileGroups, FreeTiles} from "../hand.js";
+import {Suits, Pung, Kong, Chow, Pair, TileGroups, FreeTiles} from "../hand.js";
 import {EventEmitter} from "../utils.js";
 
 class HandCreatorView {
@@ -9,8 +9,6 @@ class HandCreatorView {
         this.allTiles = [];
         this.addedSets = [];
 
-        // this.hand = new Hand();
-
         this.suitGroups = this.root.querySelector('.suitGroups');
         this.handContents = this.root.querySelector('.handContent');
 
@@ -18,6 +16,7 @@ class HandCreatorView {
         this.isWinnerInput = this.root.elements['isWinner'];
         this.lastTileFromWallInput = this.root.elements['lastTileFromWall'];
         this.lastAvailableTileInput = this.root.elements['lastAvailableTile'];
+        this.lastTileSpecialInput = this.root.elements['lastTileSpecial'];
 
         this.playerNameSlot = this.root.querySelector('[data-slot="playerName"]');
         this.roundNumberSlot = this.root.querySelector('[data-slot="roundNumber"]');
@@ -61,6 +60,7 @@ class HandCreatorView {
                 isWinner: this.isWinnerInput.checked,
                 lastTileFromWall: this.lastTileFromWallInput.checked,
                 lastAvailableTile: this.lastAvailableTileInput.checked,
+                lastTileSpecial: this.lastTileSpecialInput.checked,
             });
         });
     }
@@ -83,11 +83,6 @@ class HandCreatorView {
         if(hand) {
             hand.sets.forEach(s => this.renderNewTileset(s));
         }
-        // else {
-        //     this.refreshHandContent();
-        // }
-
-        // this.refreshHandContent();
 
         this.roundNumberSlot.textContent = round.roundNumber;
         this.playerNameSlot.textContent = player.name;

@@ -69,8 +69,6 @@ class ScoreCalculator {
             }, multipliers);
         }
 
-        // console.log('FFFFF', appliedPoints, '::', appliedMultipliers);
-
         return applyMultipliers(multipliers, points);
     }
 

@@ -13,6 +13,7 @@ import {EventEmitter} from "./utils.js";
  * @property {boolean} isWinner
  * @property {boolean} lastTileFromWall
  * @property {boolean} lastAvailableTile
+ * @property {boolean} lastTileSpecial
  */
 
 

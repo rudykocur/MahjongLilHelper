@@ -1,6 +1,3 @@
-// const hand = require('./hand');
-// const score = require('./scoring');
-
 import * as hand from './hand.js';
 import * as score from './scoring.js';
 
