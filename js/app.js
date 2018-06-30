@@ -1,8 +1,8 @@
 
-import {Hand} from './hand.mjs';
-import {Player, Game} from './game.mjs';
-import {HandCreatorView} from "./ui.handCreator.js";
-import {EventEmitter} from "./utils.mjs";
+import {Hand} from './hand.js';
+import {Player, Game} from './game.js';
+import {HandCreatorView} from "./view/handCreator.js";
+import {EventEmitter} from "./utils.js";
 
 
 /**

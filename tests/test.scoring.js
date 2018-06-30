@@ -1,9 +1,6 @@
-// const h = require('./hand');
-// const g = require('./game');
-// const s = require('./scoring');
-import * as s from './scoring.mjs';
-import * as g from './game.mjs';
-import * as h from './hand.mjs';
+import * as s from '../js/scoring.js';
+import * as g from '../js/game.js';
+import * as h from '../js/hand.js';
 
 function createGame() {
     return new g.Game(new g.Player(0, 'P1'), new g.Player(1, 'P2'), new g.Player(2, 'P3'), new g.Player(3, 'P4'));

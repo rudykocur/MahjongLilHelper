@@ -1,6 +1,5 @@
 
-// const h = require('./hand');
-import * as h from './hand.mjs';
+import * as h from './hand.js';
 
 
 function calcPungKongValue(baseValue, tileSet) {

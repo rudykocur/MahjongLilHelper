@@ -1,5 +1,5 @@
-import {Hand, Suits, Pung, Kong, Chow, Pair, TileGroups, FreeTiles} from "./hand.mjs";
-import {EventEmitter} from "./utils.mjs";
+import {Hand, Suits, Pung, Kong, Chow, Pair, TileGroups, FreeTiles} from "../hand.js";
+import {EventEmitter} from "../utils.js";
 
 class HandCreatorView {
     constructor(root) {
@@ -158,7 +158,6 @@ function renderTile(tile) {
     img.classList.add('tile');
     img.src = 'tiles/' + tile.toTypeString() + '.png';
     return img;
-    // return document.createTextNode(tile.toTypeString());
 }
 
 class HandCreatorTileView {

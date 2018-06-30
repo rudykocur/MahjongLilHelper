@@ -1,4 +1,4 @@
-import * as hand from './hand.mjs';
+import * as hand from '../js/hand.js';
 
 describe('hand tests', () => {
     it('tiles equality', () => {
