@@ -149,7 +149,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var tmpl = _needlepoint.container.resolve(_templates.TemplateContainer);
     tmpl.discover(document.body);
 
-    // let ctrl = new MahjongLilHelperMainViewController(document.getElementById('mahjongContent'));
     var ctrl = _needlepoint.container.resolve(MahjongLilHelperMainViewController);
 
     ctrl.view.mount(document.getElementById('mahjongContent'));
@@ -1688,30 +1687,45 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
 
         this.btnAddChow.addEventListener('click', function () {
             _this.onNewSetClicked(function (tiles) {
+                if (tiles.length !== 3) {
+                    return null;
+                }
                 return new (Function.prototype.bind.apply(_hand.Chow, [null].concat([_this.getHandRevealedValue()], _toConsumableArray(tiles))))();
             });
         });
 
         this.btnAddPung.addEventListener('click', function () {
             _this.onNewSetClicked(function (tiles) {
+                if (tiles.length !== 1) {
+                    return null;
+                }
                 return new _hand.Pung(_this.getHandRevealedValue(), tiles[0]);
             });
         });
 
         this.btnAddKong.addEventListener('click', function () {
             _this.onNewSetClicked(function (tiles) {
+                if (tiles.length !== 1) {
+                    return null;
+                }
                 return new _hand.Kong(_this.getHandRevealedValue(), tiles[0]);
             });
         });
 
         this.btnAddPair.addEventListener('click', function () {
             _this.onNewSetClicked(function (tiles) {
+                if (tiles.length !== 1) {
+                    return null;
+                }
                 return new _hand.Pair(tiles[0]);
             });
         });
 
         this.btnAddTiles.addEventListener('click', function () {
             _this.onNewSetClicked(function (tiles) {
+                if (tiles.length < 1) {
+                    return null;
+                }
                 return new _hand.FreeTiles(tiles);
             });
         });
@@ -1794,7 +1808,13 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
 
             var newSet = callback(tiles);
 
-            this.renderNewTileset(newSet);
+            if (newSet !== null) {
+                this.renderNewTileset(newSet);
+            }
+
+            this.allTiles.forEach(function (t) {
+                return t.resetSelected();
+            });
         }
     }, {
         key: "renderNewTileset",
@@ -1808,9 +1828,6 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
                 _this5.refreshHandContent();
             });
 
-            this.allTiles.forEach(function (t) {
-                return t.resetSelected();
-            });
             this.addedSets.push(view);
         }
     }, {

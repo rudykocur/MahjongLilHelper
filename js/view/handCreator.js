@@ -41,23 +41,48 @@ class HandCreatorView {
         this.root.addEventListener('submit', e => e.preventDefault());
 
         this.btnAddChow.addEventListener('click', () => {
-            this.onNewSetClicked(tiles => new Chow(this.getHandRevealedValue(), ...tiles))
+            this.onNewSetClicked(tiles => {
+                if(tiles.length !== 3) {
+                    return null;
+                }
+                return new Chow(this.getHandRevealedValue(), ...tiles)
+            })
         });
 
         this.btnAddPung.addEventListener('click', () => {
-            this.onNewSetClicked(tiles => new Pung(this.getHandRevealedValue(), tiles[0]))
+            this.onNewSetClicked(tiles => {
+                if(tiles.length !== 1) {
+                    return null
+                }
+                return new Pung(this.getHandRevealedValue(), tiles[0])
+            })
         });
 
         this.btnAddKong.addEventListener('click', () => {
-            this.onNewSetClicked(tiles => new Kong(this.getHandRevealedValue(), tiles[0]))
+            this.onNewSetClicked(tiles => {
+                if(tiles.length !== 1) {
+                    return null
+                }
+                return new Kong(this.getHandRevealedValue(), tiles[0])
+            })
         });
 
         this.btnAddPair.addEventListener('click', () => {
-            this.onNewSetClicked(tiles => new Pair(tiles[0]))
+            this.onNewSetClicked(tiles => {
+                if(tiles.length !== 1) {
+                    return null
+                }
+                return new Pair(tiles[0])
+            })
         });
 
         this.btnAddTiles.addEventListener('click', () => {
-            this.onNewSetClicked(tiles => new FreeTiles(tiles))
+            this.onNewSetClicked(tiles => {
+                if(tiles.length < 1) {
+                    return null
+                }
+                return new FreeTiles(tiles)
+            })
         });
 
         this.btnFinishHand.addEventListener('click', () => {
@@ -119,7 +144,11 @@ class HandCreatorView {
 
         let newSet = callback(tiles);
 
-        this.renderNewTileset(newSet);
+        if(newSet !== null) {
+            this.renderNewTileset(newSet);
+        }
+
+        this.allTiles.forEach(t => t.resetSelected());
     }
 
     renderNewTileset(tileset) {
@@ -130,7 +159,7 @@ class HandCreatorView {
             this.refreshHandContent();
         });
 
-        this.allTiles.forEach(t => t.resetSelected());
+
         this.addedSets.push(view);
     }
 
@@ -202,6 +231,7 @@ class HandAddedTilesView {
         });
 
         let delButton = this.view.appendChild(document.createElement('li'));
+        delButton.classList.add('actionDelete');
 
         delButton.appendChild(document.createTextNode('X'));
         delButton.addEventListener('click', () => {
