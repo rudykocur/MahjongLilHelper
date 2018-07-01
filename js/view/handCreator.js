@@ -3,15 +3,16 @@ import {EventEmitter} from "../utils.js";
 import {domLoader} from "./templates.js";
 
 import {dependencies} from 'needlepoint';
+import {GamePanel} from "./gamePanel";
 
 @dependencies(domLoader('HandCreatorTemplate'))
-class HandCreatorView {
+class HandCreatorView extends GamePanel{
 
     /**
      * @param {DomTemplate} template
      */
     constructor(template) {
-        this.root = template.getRoot();
+        super(template.getRoot());
 
         this.onEditFinish = new EventEmitter();
 

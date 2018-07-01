@@ -1,17 +1,20 @@
 import {EventEmitter} from "../utils";
 import {domLoader} from "./templates";
 import {dependencies} from "needlepoint";
+import {GamePanel} from "./gamePanel";
 
 
 @dependencies(domLoader('GameBalanceTemplate'))
-export class GameBalanceTableView {
+export class GameBalanceTableView extends GamePanel{
 
     /**
      * @param {DomTemplate} template
      */
     constructor(template) {
+        super(template.getRoot());
+
         this.template = template;
-        this.table = this.root = template.getRoot();
+        this.table = template.getRoot();
         this.tbody = this.table.querySelector('tbody');
 
         this.onHandEditClick = new EventEmitter();
@@ -25,7 +28,6 @@ export class GameBalanceTableView {
     }
 
     /**
-     *
      * @param {Game} game
      */
     renderGameBalance(game) {
@@ -69,18 +71,5 @@ export class GameBalanceTableView {
             cell.appendChild(document.createTextNode(bal));
             return cell;
         });
-    }
-
-    renderSummaryRow(game) {
-        let balance = game.getTotalBalance();
-
-        let foot = this.table.createTFoot();
-
-        console.log(foot);
-
-        let row = foot.insertRow();
-
-        row.insertCell().appendChild(document.createTextNode('łącznie'));
-        this._renderBalance(row, balance);
     }
 }

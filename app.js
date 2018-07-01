@@ -94,7 +94,6 @@ var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewControl
         this.view = view;
 
         /**
-         *
          * @type {Game}
          */
         this.game = null;
@@ -147,7 +146,7 @@ var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewControl
     return MahjongLilHelperMainViewController;
 }()) || _class2);
 
-},{"./game.js":2,"./hand.js":3,"./view/gameBalance":7,"./view/handCreator.js":8,"./view/templates":9,"needlepoint":12}],2:[function(require,module,exports){
+},{"./game.js":2,"./hand.js":3,"./view/gameBalance":7,"./view/handCreator.js":9,"./view/templates":10,"needlepoint":13}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -307,6 +306,9 @@ var Game = function () {
     function Game(p1, p2, p3, p4) {
         _classCallCheck(this, Game);
 
+        /**
+         * @type {Array<Player>}
+         */
         this.players = [p1, p2, p3, p4];
 
         this.rounds = [];
@@ -827,7 +829,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
     console.log('READY', ctrl);
 });
 
-},{"./app":1,"./game":2,"./view/templates":9,"needlepoint":12}],5:[function(require,module,exports){
+},{"./app":1,"./game":2,"./view/templates":10,"needlepoint":13}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1566,34 +1568,41 @@ var _templates = require("./templates");
 
 var _needlepoint = require("needlepoint");
 
+var _gamePanel = require("./gamePanel");
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var GameBalanceTableView = exports.GameBalanceTableView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)('GameBalanceTemplate')), _dec(_class = function () {
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var GameBalanceTableView = exports.GameBalanceTableView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)('GameBalanceTemplate')), _dec(_class = function (_GamePanel) {
+    _inherits(GameBalanceTableView, _GamePanel);
 
     /**
      * @param {DomTemplate} template
      */
     function GameBalanceTableView(template) {
-        var _this = this;
-
         _classCallCheck(this, GameBalanceTableView);
 
-        this.template = template;
-        this.table = this.root = template.getRoot();
-        this.tbody = this.table.querySelector('tbody');
+        var _this = _possibleConstructorReturn(this, (GameBalanceTableView.__proto__ || Object.getPrototypeOf(GameBalanceTableView)).call(this, template.getRoot()));
 
-        this.onHandEditClick = new _utils.EventEmitter();
-        this.addRoundEvent = new _utils.EventEmitter();
+        _this.template = template;
+        _this.table = template.getRoot();
+        _this.tbody = _this.table.querySelector('tbody');
 
-        this._createdRows = [];
+        _this.onHandEditClick = new _utils.EventEmitter();
+        _this.addRoundEvent = new _utils.EventEmitter();
 
-        this.root.querySelector('[data-action="addRound"]').addEventListener('click', function () {
+        _this._createdRows = [];
+
+        _this.root.querySelector('[data-action="addRound"]').addEventListener('click', function () {
             _this.addRoundEvent.emit();
         });
+        return _this;
     }
 
     /**
-     *
      * @param {Game} game
      */
 
@@ -1647,26 +1656,45 @@ var GameBalanceTableView = exports.GameBalanceTableView = (_dec = (0, _needlepoi
                 return cell;
             });
         }
-    }, {
-        key: "renderSummaryRow",
-        value: function renderSummaryRow(game) {
-            var balance = game.getTotalBalance();
-
-            var foot = this.table.createTFoot();
-
-            console.log(foot);
-
-            var row = foot.insertRow();
-
-            row.insertCell().appendChild(document.createTextNode('łącznie'));
-            this._renderBalance(row, balance);
-        }
     }]);
 
     return GameBalanceTableView;
-}()) || _class);
+}(_gamePanel.GamePanel)) || _class);
 
-},{"../utils":6,"./templates":9,"needlepoint":12}],8:[function(require,module,exports){
+},{"../utils":6,"./gamePanel":8,"./templates":10,"needlepoint":13}],8:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var GamePanel = exports.GamePanel = function () {
+    function GamePanel(root) {
+        _classCallCheck(this, GamePanel);
+
+        this.root = root;
+    }
+
+    _createClass(GamePanel, [{
+        key: 'show',
+        value: function show() {
+            this.root.classList.remove('hidden');
+        }
+    }, {
+        key: 'hide',
+        value: function hide() {
+            this.root.classList.add('hidden');
+        }
+    }]);
+
+    return GamePanel;
+}();
+
+},{}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1686,52 +1714,57 @@ var _templates = require("./templates.js");
 
 var _needlepoint = require("needlepoint");
 
+var _gamePanel = require("./gamePanel");
+
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)('HandCreatorTemplate')), _dec(_class = function () {
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)('HandCreatorTemplate')), _dec(_class = function (_GamePanel) {
+    _inherits(HandCreatorView, _GamePanel);
 
     /**
      * @param {DomTemplate} template
      */
     function HandCreatorView(template) {
-        var _this = this;
-
         _classCallCheck(this, HandCreatorView);
 
-        this.root = template.getRoot();
+        var _this = _possibleConstructorReturn(this, (HandCreatorView.__proto__ || Object.getPrototypeOf(HandCreatorView)).call(this, template.getRoot()));
 
-        this.onEditFinish = new _utils.EventEmitter();
+        _this.onEditFinish = new _utils.EventEmitter();
 
-        this.allTiles = [];
-        this.addedSets = [];
+        _this.allTiles = [];
+        _this.addedSets = [];
 
-        this.suitGroups = this.root.querySelector('.suitGroups');
-        this.handContents = this.root.querySelector('.handContent');
+        _this.suitGroups = _this.root.querySelector('.suitGroups');
+        _this.handContents = _this.root.querySelector('.handContent');
 
-        this.handRevealedInput = this.root.elements['revealed'];
-        this.isWinnerInput = this.root.elements['isWinner'];
-        this.lastTileFromWallInput = this.root.elements['lastTileFromWall'];
-        this.lastAvailableTileInput = this.root.elements['lastAvailableTile'];
-        this.lastTileSpecialInput = this.root.elements['lastTileSpecial'];
+        _this.handRevealedInput = _this.root.elements['revealed'];
+        _this.isWinnerInput = _this.root.elements['isWinner'];
+        _this.lastTileFromWallInput = _this.root.elements['lastTileFromWall'];
+        _this.lastAvailableTileInput = _this.root.elements['lastAvailableTile'];
+        _this.lastTileSpecialInput = _this.root.elements['lastTileSpecial'];
 
-        this.playerNameSlot = this.root.querySelector('[data-slot="playerName"]');
-        this.roundNumberSlot = this.root.querySelector('[data-slot="roundNumber"]');
+        _this.playerNameSlot = _this.root.querySelector('[data-slot="playerName"]');
+        _this.roundNumberSlot = _this.root.querySelector('[data-slot="roundNumber"]');
 
-        this.btnFinishHand = this.root.querySelector('[data-action="finishHand"]');
+        _this.btnFinishHand = _this.root.querySelector('[data-action="finishHand"]');
 
-        this.btnAddPair = this.root.querySelector('[data-action="addPair"]');
-        this.btnAddChow = this.root.querySelector('[data-action="addChow"]');
-        this.btnAddPung = this.root.querySelector('[data-action="addPung"]');
-        this.btnAddKong = this.root.querySelector('[data-action="addKong"]');
-        this.btnAddTiles = this.root.querySelector('[data-action="addTiles"]');
+        _this.btnAddPair = _this.root.querySelector('[data-action="addPair"]');
+        _this.btnAddChow = _this.root.querySelector('[data-action="addChow"]');
+        _this.btnAddPung = _this.root.querySelector('[data-action="addPung"]');
+        _this.btnAddKong = _this.root.querySelector('[data-action="addKong"]');
+        _this.btnAddTiles = _this.root.querySelector('[data-action="addTiles"]');
 
-        this.root.addEventListener('submit', function (e) {
+        _this.root.addEventListener('submit', function (e) {
             return e.preventDefault();
         });
 
-        this.btnAddChow.addEventListener('click', function () {
+        _this.btnAddChow.addEventListener('click', function () {
             _this.onNewSetClicked(function (tiles) {
                 if (tiles.length !== 3) {
                     return null;
@@ -1740,7 +1773,7 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
             });
         });
 
-        this.btnAddPung.addEventListener('click', function () {
+        _this.btnAddPung.addEventListener('click', function () {
             _this.onNewSetClicked(function (tiles) {
                 if (tiles.length !== 1) {
                     return null;
@@ -1749,7 +1782,7 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
             });
         });
 
-        this.btnAddKong.addEventListener('click', function () {
+        _this.btnAddKong.addEventListener('click', function () {
             _this.onNewSetClicked(function (tiles) {
                 if (tiles.length !== 1) {
                     return null;
@@ -1758,7 +1791,7 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
             });
         });
 
-        this.btnAddPair.addEventListener('click', function () {
+        _this.btnAddPair.addEventListener('click', function () {
             _this.onNewSetClicked(function (tiles) {
                 if (tiles.length !== 1) {
                     return null;
@@ -1767,7 +1800,7 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
             });
         });
 
-        this.btnAddTiles.addEventListener('click', function () {
+        _this.btnAddTiles.addEventListener('click', function () {
             _this.onNewSetClicked(function (tiles) {
                 if (tiles.length < 1) {
                     return null;
@@ -1776,7 +1809,7 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
             });
         });
 
-        this.btnFinishHand.addEventListener('click', function () {
+        _this.btnFinishHand.addEventListener('click', function () {
             var tilesets = _this.addedSets.map(function (s) {
                 return s.tileset;
             });
@@ -1790,6 +1823,7 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
                 lastTileSpecial: _this.lastTileSpecialInput.checked
             });
         });
+        return _this;
     }
 
     _createClass(HandCreatorView, [{
@@ -1906,7 +1940,7 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
     }]);
 
     return HandCreatorView;
-}()) || _class);
+}(_gamePanel.GamePanel)) || _class);
 
 
 function renderTile(tile) {
@@ -1976,7 +2010,7 @@ var HandAddedTilesView = function HandAddedTilesView(tileset, tiles, revealed) {
 
 exports.HandCreatorView = HandCreatorView;
 
-},{"../hand.js":3,"../utils.js":6,"./templates.js":9,"needlepoint":12}],9:[function(require,module,exports){
+},{"../hand.js":3,"../utils.js":6,"./gamePanel":8,"./templates.js":10,"needlepoint":13}],10:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2094,7 +2128,7 @@ var DomTemplate = exports.DomTemplate = function () {
     return DomTemplate;
 }();
 
-},{"needlepoint":12}],10:[function(require,module,exports){
+},{"needlepoint":13}],11:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -2260,7 +2294,7 @@ var Container = (function () {
 })();
 
 exports.default = Container;
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2286,7 +2320,7 @@ function dependencies() {
    * @package needlepoint
    * @copyright 2015 Andrew Munsell <andrew@wizardapps.net>
    */
-},{"./container":10}],12:[function(require,module,exports){
+},{"./container":11}],13:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2319,7 +2353,7 @@ Object.defineProperty(exports, 'dependencies', {
     return _dependencies.default;
   }
 });
-},{"./container":10,"./dependencies":11,"./singleton":13}],13:[function(require,module,exports){
+},{"./container":11,"./dependencies":12,"./singleton":14}],14:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2339,6 +2373,6 @@ function singleton(Clazz) {
    * @package needlepoint
    * @copyright 2015 Andrew Munsell <andrew@wizardapps.net>
    */
-},{"./container":10}]},{},[4])
+},{"./container":11}]},{},[4])
 
 //# sourceMappingURL=app.js.map

@@ -121,6 +121,9 @@ class RoundBalanceCalculator {
 
 class Game {
     constructor(p1, p2, p3, p4) {
+        /**
+         * @type {Array<Player>}
+         */
         this.players = [p1, p2, p3, p4];
 
         this.rounds = [];
