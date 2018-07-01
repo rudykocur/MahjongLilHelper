@@ -6,6 +6,7 @@ const jsdom = require("jsdom");
 const expect = require('chai').expect;
 
 import {HandCreatorView} from '../js/view/handCreator.js';
+import {DomTemplate} from '../js/view/templates';
 
 /**
  * @param {OnEditFinishEvent} event
@@ -73,13 +74,24 @@ function createGame() {
     return new Game(new Player(0, 'P1'), new Player(1, 'P2'), new Player(2, 'P3'), new Player(3, 'P4'));
 }
 
+class HandCreatorTemplateMock extends DomTemplate{
+    constructor(root) {
+        super('', null);
+        this.root = root;
+    }
+
+    clone() {
+        return this.root.querySelector('form');
+    }
+}
+
 describe('DOM: hand creator tests', function () {
 
     mochaJsdom();
     let htmlRoot, game, round, player, driver;
 
     function initDefaultView() {
-        let view = new HandCreatorView(htmlRoot);
+        let view = new HandCreatorView(new HandCreatorTemplateMock(htmlRoot));
         view.initUI();
         view.show(round, player);
 
@@ -296,7 +308,7 @@ describe('DOM: hand creator tests', function () {
         hand.addSet(new FreeTiles([Tiles.BonusFlower1, Tiles.BonusSummer]));
         round.setHand(player, hand);
 
-        let view = new HandCreatorView(htmlRoot);
+        let view = new HandCreatorView(new HandCreatorTemplateMock(htmlRoot));
         view.initUI();
         view.show(round, player);
 

@@ -1,9 +1,18 @@
 import {Suits, Pung, Kong, Chow, Pair, TileGroups, FreeTiles} from "../hand.js";
 import {EventEmitter} from "../utils.js";
+import {domLoader} from "./templates.js";
 
+import {dependencies} from 'needlepoint';
+
+@dependencies(domLoader('HandCreatorTemplate'))
 class HandCreatorView {
-    constructor(root) {
-        this.root = root.querySelector('#handCreator');
+
+    /**
+     * @param {DomTemplate} template
+     */
+    constructor(template) {
+        this.root = template.clone();
+
         this.onEditFinish = new EventEmitter();
 
         this.allTiles = [];

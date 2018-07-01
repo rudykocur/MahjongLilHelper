@@ -2,7 +2,10 @@
 import {Hand} from './hand.js';
 import {Player, Game} from './game.js';
 import {HandCreatorView} from "./view/handCreator.js";
-import {EventEmitter} from "./utils.js";
+import {GameBalanceTableView} from "./view/gameBalance";
+
+import {dependencies, container} from 'needlepoint';
+import {TemplateContainer, domLoader} from "./view/templates";
 
 
 /**
@@ -16,110 +19,88 @@ import {EventEmitter} from "./utils.js";
  * @property {boolean} lastTileSpecial
  */
 
+/**
+ * @typedef {Object} OnHandEditEvent
+ * @property {Round} round
+ * @property {Player} player
+ */
 
-class MahjongLilHelperMainViewController {
-    constructor(root) {
-        this.root = root;
 
-        this.balanceTable = new GameBalanceTableView(this.root);
-        this.handCreator = new HandCreatorView(this.root);
+const UI_MODE = {
+    table: 'gameBalance',
+    hand: 'handCreator'
+};
+
+@dependencies(domLoader('AppTemplate'), HandCreatorView, GameBalanceTableView)
+class MainAppUI {
+
+    /**
+     * @param {DomTemplate} template
+     * @param {HandCreatorView} handCreator
+     * @param {GameBalanceTableView} balanceView
+     */
+    constructor(template, handCreator, balanceView) {
+        this.root = template.clone();
+
+        this.handCreator = handCreator;
+        this.balanceTable = balanceView;
+
+        this.root.appendChild(this.handCreator.root);
+        this.root.appendChild(this.balanceTable.root);
 
         this.handCreator.initUI();
-
-        this.game = null;
-
-        this.balanceTable.onHandEditClick.addListener((round, player) => {
-            this.setUIMode('handCreator');
-            this.handCreator.show(round, player);
-        });
-
-        this.handCreator.onEditFinish.addListener((/*OnEditFinishEvent*/ event) => {
-
-            console.log('EVENT', event);
-
-            this.setUIMode('gameBalance');
-            let hand = new Hand();
-            event.tilesets.forEach(set => hand.addSet(set));
-
-            event.round.setHand(event.player, hand);
-            if(event.isWinner) {
-                event.round.setWinner(event.player, event.lastAvailableTile, event.lastTileFromWall);
-            }
-
-            this.balanceTable.renderGameBalance(this.game);
-        })
     }
 
-    setUIMode(mode) {
+    setMode(mode) {
         this.root.setAttribute('data-mode', mode);
     }
 
-    loadState(game) {
-        this.setUIMode('gameBalance');
-
-        this.game = game;
-        this.balanceTable.renderGameBalance(this.game);
+    mount(parent) {
+        parent.appendChild(this.root);
     }
 }
 
-class GameBalanceTableView {
-    constructor(root) {
-        this.table = root.querySelector('table');
+@dependencies(MainAppUI)
+class MahjongLilHelperMainViewController {
 
-        this.onHandEditClick = new EventEmitter();
+    /**
+     * @param {MainAppUI} view
+     */
+    constructor(view) {
+        this.view = view;
 
-        this._createdRows = [];
+        this.game = null;
+
+        this.view.balanceTable.onHandEditClick.addListener((/*OnHandEditEvent*/event) => {
+            this.view.setMode(UI_MODE.hand);
+            this.view.handCreator.show(event.round, event.player);
+        });
+
+        this.view.handCreator.onEditFinish.addListener(this.handleHandEditFinish.bind(this));
+    }
+
+    loadState(game) {
+        this.view.setMode(UI_MODE.table);
+
+        this.game = game;
+        this.view.balanceTable.renderGameBalance(this.game);
     }
 
     /**
-     *
-     * @param {Game} game
+     * @param {OnEditFinishEvent} event
      */
-    renderGameBalance(game) {
-        this._createdRows.forEach(row => row.parentNode.removeChild(row));
-        this._createdRows = [];
+    handleHandEditFinish(event) {
+        this.view.setMode(UI_MODE.table);
 
-        game.rounds.forEach(round => {
-            let balance = round.getRoundBalance();
-            let cumulativeBalance = game.getTotalBalance(round.roundIndex);
+        let hand = new Hand();
+        event.tilesets.forEach(set => hand.addSet(set));
 
-            let row = this.table.insertRow();
-            this._createdRows.push(row);
+        event.round.setHand(event.player, hand);
+        if(event.isWinner) {
+            event.round.setWinner(event.player, event.lastAvailableTile, event.lastTileFromWall);
+        }
 
-            row.insertCell().appendChild(document.createTextNode(round.roundNumber));
-
-            let roundCells = this._renderBalance(row, balance);
-            this._renderBalance(row, cumulativeBalance);
-
-            roundCells.forEach((cell, index) => {
-                cell.addEventListener('click', () => {
-                    this.onHandEditClick.emit(round, game.players[index]);
-                })
-            })
-        });
-    }
-
-    _renderBalance(row, balance) {
-        // let cells = [];
-
-        return balance.map(bal => {
-            let cell = row.insertCell();
-            cell.appendChild(document.createTextNode(bal));
-            return cell;
-        });
-    }
-
-    renderSummaryRow(game) {
-        let balance = game.getTotalBalance();
-
-        let foot = this.table.createTFoot();
-
-        console.log(foot);
-
-        let row = foot.insertRow();
-
-        row.insertCell().appendChild(document.createTextNode('łącznie'));
-        this._renderBalance(row, balance);
+        this.view.balanceTable.renderGameBalance(this.game);
     }
 }
 
@@ -141,7 +122,12 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
     let round3 = game.createRound();
 
-    let ctrl = new MahjongLilHelperMainViewController(document.getElementById('mahjongContent'));
+    let tmpl = container.resolve(TemplateContainer);
+    tmpl.discover(document.body);
+
+    let ctrl = container.resolve(MahjongLilHelperMainViewController);
+
+    ctrl.view.mount(document.getElementById('mahjongContent'));
 
     ctrl.loadState(game);
 

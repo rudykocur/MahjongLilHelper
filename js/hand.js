@@ -276,6 +276,9 @@ class Hand {
         this.tiles = this.tiles.concat(tileSet.tiles);
     }
 
+    /**
+     * @return {Array<TileSet>}
+     */
     getSetsOfType(clazz, tileType) {
         let result = this.sets.filter((tileSet) => tileSet instanceof clazz);
 
