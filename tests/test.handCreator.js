@@ -7,21 +7,6 @@ const expect = require('chai').expect;
 
 import {HandCreatorView} from '../js/view/handCreator.js';
 
-function fireEvent(root, selector, eventName) {
-    let element = root.querySelector(selector);
-    var evt = element.ownerDocument.createEvent("HTMLEvents");
-    evt.initEvent(eventName, true, true);
-    element.dispatchEvent(evt)
-}
-
-function clickElement(root, selector) {
-    fireEvent(root, selector, 'click');
-}
-
-function clickTile(root, tile) {
-    fireEvent(root, `img[src*="${tile.toTypeString()}"]`, 'click');
-}
-
 /**
  * @param {OnEditFinishEvent} event
  * @return {Hand}
@@ -43,7 +28,46 @@ const SELECTORS = {
     checkboxLastTileFromWall: '[name="lastTileFromWall"]',
     checkboxLastTileSpecial: '[name="lastTileSpecial"]',
     checkboxLastAvailableTile: '[name="lastAvailableTile"]',
+    radioIsRevealed: '#setRevealed',
+    radioIsConcealed: '#setConcealed',
 };
+
+class HandCreatorViewDriver {
+    constructor(root) {
+        this.root = root;
+
+        this.form = this.root.querySelector('form');
+    }
+
+    _fireEvent(selector, eventName) {
+        let element = this.root.querySelector(selector);
+        let evt = element.ownerDocument.createEvent("HTMLEvents");
+        evt.initEvent(eventName, true, true);
+        element.dispatchEvent(evt)
+    }
+
+    _setRadio(form, name, value) {
+        form.elements[name].value = value;
+    }
+
+    clickTile(tile) {
+        this._fireEvent(`img[src*="${tile.toTypeString()}"]`, 'click');
+    }
+
+    click(selector) {
+        this._fireEvent(selector, 'click');
+    }
+
+    setIsRevealed(isRevealed) {
+        if(isRevealed) {
+            this._setRadio(this.form, 'revealed', '1');
+        }
+        else {
+            this._setRadio(this.form, 'revealed', '');
+        }
+
+    }
+}
 
 function createGame() {
     return new Game(new Player(0, 'P1'), new Player(1, 'P2'), new Player(2, 'P3'), new Player(3, 'P4'));
@@ -52,7 +76,7 @@ function createGame() {
 describe('DOM: hand creator tests', function () {
 
     mochaJsdom();
-    let htmlRoot, game, round, player;
+    let htmlRoot, game, round, player, driver;
 
     function initDefaultView() {
         let view = new HandCreatorView(htmlRoot);
@@ -69,6 +93,7 @@ describe('DOM: hand creator tests', function () {
 
         return htmlRoot = jsdom.JSDOM.fromFile('./tests/test_html/hand.html').then((dom) => {
             htmlRoot = dom.window.document.body;
+            driver = new HandCreatorViewDriver(htmlRoot);
         })
     });
 
@@ -80,7 +105,7 @@ describe('DOM: hand creator tests', function () {
             done();
         });
 
-        clickElement(htmlRoot, SELECTORS.btnFinishHand);
+        driver.click(SELECTORS.btnFinishHand);
     });
 
     it('adding kong', function (done) {
@@ -92,9 +117,9 @@ describe('DOM: hand creator tests', function () {
             done();
         });
 
-        clickTile(htmlRoot, Tiles.Bamboo2);
-        clickElement(htmlRoot, SELECTORS.btnAddKong);
-        clickElement(htmlRoot, SELECTORS.btnFinishHand);
+        driver.clickTile(Tiles.Bamboo2);
+        driver.click(SELECTORS.btnAddKong);
+        driver.click(SELECTORS.btnFinishHand);
     });
 
     it('adding pung', function (done) {
@@ -106,9 +131,9 @@ describe('DOM: hand creator tests', function () {
             done();
         });
 
-        clickTile(htmlRoot, Tiles.Bamboo3);
-        clickElement(htmlRoot, SELECTORS.btnAddPung);
-        clickElement(htmlRoot, SELECTORS.btnFinishHand);
+        driver.clickTile(Tiles.Bamboo3);
+        driver.click(SELECTORS.btnAddPung);
+        driver.click(SELECTORS.btnFinishHand);
     });
 
     it('adding chow', function (done) {
@@ -122,11 +147,11 @@ describe('DOM: hand creator tests', function () {
             done();
         });
 
-        clickTile(htmlRoot, Tiles.Bamboo3);
-        clickTile(htmlRoot, Tiles.Bamboo5);
-        clickTile(htmlRoot, Tiles.Bamboo4);
-        clickElement(htmlRoot, SELECTORS.btnAddChow);
-        clickElement(htmlRoot, SELECTORS.btnFinishHand);
+        driver.clickTile(Tiles.Bamboo3);
+        driver.clickTile(Tiles.Bamboo5);
+        driver.clickTile(Tiles.Bamboo4);
+        driver.click(SELECTORS.btnAddChow);
+        driver.click(SELECTORS.btnFinishHand);
     });
 
     it('adding pair', function (done) {
@@ -138,9 +163,51 @@ describe('DOM: hand creator tests', function () {
             done();
         });
 
-        clickTile(htmlRoot, Tiles.Bamboo3);
-        clickElement(htmlRoot, SELECTORS.btnAddPair);
-        clickElement(htmlRoot, SELECTORS.btnFinishHand);
+        driver.clickTile(Tiles.Bamboo3);
+        driver.click(SELECTORS.btnAddPair);
+        driver.click(SELECTORS.btnFinishHand);
+    });
+
+    it('adding concealed kong', function (done) {
+        let view = initDefaultView();
+        view.onEditFinish.addListener((/*OnEditFinishEvent*/ data) => {
+            let hand = getHand(data);
+            let kongs = hand.getSetsOfType(Kong);
+            expect(hand.tiles.length).to.be.equal(4);
+            expect(kongs.length).to.be.equal(1);
+            expect(kongs[0].isRevealed).to.be.equal(false);
+            done();
+        });
+
+        driver.clickTile(Tiles.Bamboo3);
+        driver.setIsRevealed(false);
+        driver.click(SELECTORS.btnAddKong);
+        driver.click(SELECTORS.btnFinishHand);
+    });
+
+    it('adding few tilesets', function (done) {
+        let view = initDefaultView();
+        view.onEditFinish.addListener((/*OnEditFinishEvent*/ data) => {
+            let hand = getHand(data);
+            expect(hand.tiles.length).to.be.equal(9);
+            expect(hand.sets.length).to.be.equal(3);
+            expect(hand.getSetsOfType(Kong).length).to.be.equal(1);
+            expect(hand.getSetsOfType(Pair).length).to.be.equal(1);
+            expect(hand.getSetsOfType(Pung).length).to.be.equal(1);
+
+            expect(hand.getSetsOfType(Kong)[0].isRevealed).to.be.equal(false);
+            expect(hand.getSetsOfType(Pung)[0].isRevealed).to.be.equal(true);
+            done();
+        });
+
+        driver.clickTile(Tiles.Bamboo3);
+        driver.click(SELECTORS.btnAddPung);
+        driver.clickTile(Tiles.Bamboo1);
+        driver.setIsRevealed(false);
+        driver.click(SELECTORS.btnAddKong);
+        driver.clickTile(Tiles.Bamboo2);
+        driver.click(SELECTORS.btnAddPair);
+        driver.click(SELECTORS.btnFinishHand);
     });
 
     it('adding loose tiles', function (done) {
@@ -155,13 +222,13 @@ describe('DOM: hand creator tests', function () {
             done();
         });
 
-        clickTile(htmlRoot, Tiles.BonusAutumn);
-        clickTile(htmlRoot, Tiles.BonusFlower2);
-        clickElement(htmlRoot, SELECTORS.btnAddTiles);
-        clickTile(htmlRoot, Tiles.BonusFlower1);
-        clickTile(htmlRoot, Tiles.BonusSummer);
-        clickElement(htmlRoot, SELECTORS.btnAddTiles);
-        clickElement(htmlRoot, SELECTORS.btnFinishHand);
+        driver.clickTile(Tiles.BonusAutumn);
+        driver.clickTile(Tiles.BonusFlower2);
+        driver.click(SELECTORS.btnAddTiles);
+        driver.clickTile(Tiles.BonusFlower1);
+        driver.clickTile(Tiles.BonusSummer);
+        driver.click(SELECTORS.btnAddTiles);
+        driver.click(SELECTORS.btnFinishHand);
     });
 
     it('not adding clicked tiles', function (done) {
@@ -172,9 +239,9 @@ describe('DOM: hand creator tests', function () {
             done();
         });
 
-        clickTile(htmlRoot, Tiles.BonusAutumn);
-        clickTile(htmlRoot, Tiles.BonusFlower2);
-        clickElement(htmlRoot, SELECTORS.btnFinishHand);
+        driver.clickTile(Tiles.BonusAutumn);
+        driver.clickTile(Tiles.BonusFlower2);
+        driver.click(SELECTORS.btnFinishHand);
     });
 
     it('selecting winner', function (done) {
@@ -184,8 +251,8 @@ describe('DOM: hand creator tests', function () {
             done();
         });
 
-        clickElement(htmlRoot, SELECTORS.checkboxIsWinner);
-        clickElement(htmlRoot, SELECTORS.btnFinishHand);
+        driver.click(SELECTORS.checkboxIsWinner);
+        driver.click(SELECTORS.btnFinishHand);
     });
 
     it('selecting last available tile', function (done) {
@@ -195,8 +262,8 @@ describe('DOM: hand creator tests', function () {
             done();
         });
 
-        clickElement(htmlRoot, SELECTORS.checkboxLastAvailableTile);
-        clickElement(htmlRoot, SELECTORS.btnFinishHand);
+        driver.click(SELECTORS.checkboxLastAvailableTile);
+        driver.click(SELECTORS.btnFinishHand);
     });
 
     it('selecting last tile from wall', function (done) {
@@ -206,8 +273,8 @@ describe('DOM: hand creator tests', function () {
             done();
         });
 
-        clickElement(htmlRoot, SELECTORS.checkboxLastTileFromWall);
-        clickElement(htmlRoot, SELECTORS.btnFinishHand);
+        driver.click(SELECTORS.checkboxLastTileFromWall);
+        driver.click(SELECTORS.btnFinishHand);
     });
 
     it('selecting last special', function (done) {
@@ -217,8 +284,8 @@ describe('DOM: hand creator tests', function () {
             done();
         });
 
-        clickElement(htmlRoot, SELECTORS.checkboxLastTileSpecial);
-        clickElement(htmlRoot, SELECTORS.btnFinishHand);
+        driver.click(SELECTORS.checkboxLastTileSpecial);
+        driver.click(SELECTORS.btnFinishHand);
     });
 
     it('saving loaded hand', (done) => {
@@ -244,7 +311,7 @@ describe('DOM: hand creator tests', function () {
             done();
         });
 
-        clickElement(htmlRoot, SELECTORS.btnFinishHand);
+        driver.click(SELECTORS.btnFinishHand);
     })
 
 });
