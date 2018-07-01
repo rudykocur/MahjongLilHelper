@@ -1,6 +1,11 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 'use strict';
 
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.MahjongLilHelperMainViewController = exports.MainAppUI = undefined;
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _dec, _class, _dec2, _class2;
@@ -41,7 +46,7 @@ var UI_MODE = {
     hand: 'handCreator'
 };
 
-var MainAppUI = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)('AppTemplate'), _handCreator.HandCreatorView, _gameBalance.GameBalanceTableView), _dec(_class = function () {
+var MainAppUI = exports.MainAppUI = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)('AppTemplate'), _handCreator.HandCreatorView, _gameBalance.GameBalanceTableView), _dec(_class = function () {
 
     /**
      * @param {DomTemplate} template
@@ -76,7 +81,7 @@ var MainAppUI = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)
 
     return MainAppUI;
 }()) || _class);
-var MahjongLilHelperMainViewController = (_dec2 = (0, _needlepoint.dependencies)(MainAppUI), _dec2(_class2 = function () {
+var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewController = (_dec2 = (0, _needlepoint.dependencies)(MainAppUI), _dec2(_class2 = function () {
 
     /**
      * @param {MainAppUI} view
@@ -88,11 +93,20 @@ var MahjongLilHelperMainViewController = (_dec2 = (0, _needlepoint.dependencies)
 
         this.view = view;
 
+        /**
+         *
+         * @type {Game}
+         */
         this.game = null;
 
         this.view.balanceTable.onHandEditClick.addListener(function ( /*OnHandEditEvent*/event) {
             _this.view.setMode(UI_MODE.hand);
             _this.view.handCreator.show(event.round, event.player);
+        });
+
+        this.view.balanceTable.addRoundEvent.addListener(function () {
+            _this.game.createRound();
+            _this.view.balanceTable.renderGameBalance(_this.game);
         });
 
         this.view.handCreator.onEditFinish.addListener(this.handleHandEditFinish.bind(this));
@@ -133,32 +147,7 @@ var MahjongLilHelperMainViewController = (_dec2 = (0, _needlepoint.dependencies)
     return MahjongLilHelperMainViewController;
 }()) || _class2);
 
-
-document.addEventListener("DOMContentLoaded", function (event) {
-    var players = [new _game.Player(0, "Grzesiek"), new _game.Player(1, "Wojtek"), new _game.Player(2, "Gosia"), new _game.Player(3, "Ola")];
-    var game = new _game.Game(players[0], players[1], players[2], players[3]);
-
-    var round1 = game.createRound();
-    // round1.roundScores = [100, 200, 300, 400];
-
-    var round2 = game.createRound();
-    // round2.roundScores = [200, 100, 50, 10];
-
-    var round3 = game.createRound();
-
-    var tmpl = _needlepoint.container.resolve(_templates.TemplateContainer);
-    tmpl.discover(document.body);
-
-    var ctrl = _needlepoint.container.resolve(MahjongLilHelperMainViewController);
-
-    ctrl.view.mount(document.getElementById('mahjongContent'));
-
-    ctrl.loadState(game);
-
-    console.log('READY', ctrl);
-});
-
-},{"./game.js":2,"./hand.js":3,"./view/gameBalance":6,"./view/handCreator.js":7,"./view/templates":8,"needlepoint":11}],2:[function(require,module,exports){
+},{"./game.js":2,"./hand.js":3,"./view/gameBalance":7,"./view/handCreator.js":8,"./view/templates":9,"needlepoint":12}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -368,7 +357,7 @@ exports.Round = Round;
 exports.Player = Player;
 exports.RoundBalanceCalculator = RoundBalanceCalculator;
 
-},{"./hand.js":3,"./scoring.js":4}],3:[function(require,module,exports){
+},{"./hand.js":3,"./scoring.js":5}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -804,6 +793,41 @@ exports.WindOrder = WindOrder;
 exports.TileGroups = TileGroups;
 
 },{}],4:[function(require,module,exports){
+"use strict";
+
+var _templates = require("./view/templates");
+
+var _game = require("./game");
+
+var _app = require("./app");
+
+var _needlepoint = require("needlepoint");
+
+document.addEventListener("DOMContentLoaded", function (event) {
+    var players = [new _game.Player(0, "Grzesiek"), new _game.Player(1, "Wojtek"), new _game.Player(2, "Gosia"), new _game.Player(3, "Ola")];
+    var game = new _game.Game(players[0], players[1], players[2], players[3]);
+
+    var round1 = game.createRound();
+    // round1.roundScores = [100, 200, 300, 400];
+
+    var round2 = game.createRound();
+    // round2.roundScores = [200, 100, 50, 10];
+
+    var round3 = game.createRound();
+
+    var tmpl = _needlepoint.container.resolve(_templates.TemplateContainer);
+    tmpl.discover(document.body);
+
+    var ctrl = _needlepoint.container.resolve(_app.MahjongLilHelperMainViewController);
+
+    ctrl.view.mount(document.getElementById('mahjongContent'));
+
+    ctrl.loadState(game);
+
+    console.log('READY', ctrl);
+});
+
+},{"./app":1,"./game":2,"./view/templates":9,"needlepoint":12}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1483,7 +1507,7 @@ var HalfColorMultiplier = function (_MultiplierRule11) {
 
 exports.ScoreCalculator = ScoreCalculator;
 
-},{"./hand.js":3}],5:[function(require,module,exports){
+},{"./hand.js":3}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1524,7 +1548,7 @@ var EventEmitter = function () {
 
 exports.EventEmitter = EventEmitter;
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1642,7 +1666,7 @@ var GameBalanceTableView = exports.GameBalanceTableView = (_dec = (0, _needlepoi
     return GameBalanceTableView;
 }()) || _class);
 
-},{"../utils":5,"./templates":8,"needlepoint":11}],7:[function(require,module,exports){
+},{"../utils":6,"./templates":9,"needlepoint":12}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1952,7 +1976,7 @@ var HandAddedTilesView = function HandAddedTilesView(tileset, tiles, revealed) {
 
 exports.HandCreatorView = HandCreatorView;
 
-},{"../hand.js":3,"../utils.js":5,"./templates.js":8,"needlepoint":11}],8:[function(require,module,exports){
+},{"../hand.js":3,"../utils.js":6,"./templates.js":9,"needlepoint":12}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2070,7 +2094,7 @@ var DomTemplate = exports.DomTemplate = function () {
     return DomTemplate;
 }();
 
-},{"needlepoint":11}],9:[function(require,module,exports){
+},{"needlepoint":12}],10:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -2236,7 +2260,7 @@ var Container = (function () {
 })();
 
 exports.default = Container;
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2262,7 +2286,7 @@ function dependencies() {
    * @package needlepoint
    * @copyright 2015 Andrew Munsell <andrew@wizardapps.net>
    */
-},{"./container":9}],11:[function(require,module,exports){
+},{"./container":10}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2295,7 +2319,7 @@ Object.defineProperty(exports, 'dependencies', {
     return _dependencies.default;
   }
 });
-},{"./container":9,"./dependencies":10,"./singleton":12}],12:[function(require,module,exports){
+},{"./container":10,"./dependencies":11,"./singleton":13}],13:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2315,6 +2339,6 @@ function singleton(Clazz) {
    * @package needlepoint
    * @copyright 2015 Andrew Munsell <andrew@wizardapps.net>
    */
-},{"./container":9}]},{},[1])
+},{"./container":10}]},{},[4])
 
 //# sourceMappingURL=app.js.map

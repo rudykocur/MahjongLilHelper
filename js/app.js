@@ -1,11 +1,11 @@
 
 import {Hand} from './hand.js';
-import {Player, Game} from './game.js';
+import {Player} from './game.js';
 import {HandCreatorView} from "./view/handCreator.js";
 import {GameBalanceTableView} from "./view/gameBalance";
 
-import {dependencies, container} from 'needlepoint';
-import {TemplateContainer, domLoader} from "./view/templates";
+import {dependencies} from 'needlepoint';
+import {domLoader} from "./view/templates";
 
 
 /**
@@ -32,7 +32,7 @@ const UI_MODE = {
 };
 
 @dependencies(domLoader('AppTemplate'), HandCreatorView, GameBalanceTableView)
-class MainAppUI {
+export class MainAppUI {
 
     /**
      * @param {DomTemplate} template
@@ -61,7 +61,7 @@ class MainAppUI {
 }
 
 @dependencies(MainAppUI)
-class MahjongLilHelperMainViewController {
+export class MahjongLilHelperMainViewController {
 
     /**
      * @param {MainAppUI} view
@@ -69,11 +69,19 @@ class MahjongLilHelperMainViewController {
     constructor(view) {
         this.view = view;
 
+        /**
+         * @type {Game}
+         */
         this.game = null;
 
         this.view.balanceTable.onHandEditClick.addListener((/*OnHandEditEvent*/event) => {
             this.view.setMode(UI_MODE.hand);
             this.view.handCreator.show(event.round, event.player);
+        });
+
+        this.view.balanceTable.addRoundEvent.addListener(() => {
+            this.game.createRound();
+            this.view.balanceTable.renderGameBalance(this.game);
         });
 
         this.view.handCreator.onEditFinish.addListener(this.handleHandEditFinish.bind(this));
@@ -103,33 +111,3 @@ class MahjongLilHelperMainViewController {
         this.view.balanceTable.renderGameBalance(this.game);
     }
 }
-
-
-document.addEventListener("DOMContentLoaded", function(event) {
-    let players = [
-        new Player(0, "Grzesiek"),
-        new Player(1, "Wojtek"),
-        new Player(2, "Gosia"),
-        new Player(3, "Ola"),
-    ];
-    let game = new Game(players[0], players[1], players[2], players[3]);
-
-    let round1 = game.createRound();
-    // round1.roundScores = [100, 200, 300, 400];
-
-    let round2 = game.createRound();
-    // round2.roundScores = [200, 100, 50, 10];
-
-    let round3 = game.createRound();
-
-    let tmpl = container.resolve(TemplateContainer);
-    tmpl.discover(document.body);
-
-    let ctrl = container.resolve(MahjongLilHelperMainViewController);
-
-    ctrl.view.mount(document.getElementById('mahjongContent'));
-
-    ctrl.loadState(game);
-
-    console.log('READY', ctrl);
-});

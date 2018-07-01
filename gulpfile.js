@@ -39,7 +39,7 @@ gulp.task('tests', ['babel'], function () {
 
 gulp.task('default', () => {
     return browserify({
-        entries: ['./js/app.js'],
+        entries: ['./js/init.js'],
         debug: true})
         .transform(babelify, {
             sourceMaps: true

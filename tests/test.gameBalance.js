@@ -7,7 +7,7 @@ import {Player, Game} from "../js/game";
 const jsdom = require("jsdom");
 const expect = require('chai').expect;
 
-import {DomTemplateMock, loadTestHtml} from "./utils";
+import {loadTestHtml} from "./utils";
 
 import {GameBalanceTableView} from "../js/view/gameBalance";
 import {GameBalanceViewDriver} from "./drivers/driver.gameBalance";
@@ -141,6 +141,4 @@ describe('DOM: game balance table tests', () => {
             driver.clickAddRoundButton();
         })
     })
-
-
 });
