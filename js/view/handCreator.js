@@ -11,7 +11,7 @@ class HandCreatorView {
      * @param {DomTemplate} template
      */
     constructor(template) {
-        this.root = template.clone();
+        this.root = template.getRoot();
 
         this.onEditFinish = new EventEmitter();
 

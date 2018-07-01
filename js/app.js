@@ -40,7 +40,7 @@ class MainAppUI {
      * @param {GameBalanceTableView} balanceView
      */
     constructor(template, handCreator, balanceView) {
-        this.root = template.clone();
+        this.root = template.getRoot();
 
         this.handCreator = handCreator;
         this.balanceTable = balanceView;

@@ -126,6 +126,9 @@ class Game {
         this.rounds = [];
     }
 
+    /**
+     * @return {Round}
+     */
     createRound() {
         let round = new Round(this.players, this.rounds.length);
 

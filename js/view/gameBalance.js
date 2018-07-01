@@ -10,11 +10,18 @@ export class GameBalanceTableView {
      * @param {DomTemplate} template
      */
     constructor(template) {
-        this.table = this.root = template.clone();
+        this.template = template;
+        this.table = this.root = template.getRoot();
+        this.tbody = this.table.querySelector('tbody');
 
         this.onHandEditClick = new EventEmitter();
+        this.addRoundEvent = new EventEmitter();
 
         this._createdRows = [];
+
+        this.root.querySelector('[data-action="addRound"]').addEventListener('click', () => {
+            this.addRoundEvent.emit();
+        })
     }
 
     /**
@@ -22,6 +29,13 @@ export class GameBalanceTableView {
      * @param {Game} game
      */
     renderGameBalance(game) {
+        this.template.fillSlots({
+            player1Name: game.players[0].name,
+            player2Name: game.players[1].name,
+            player3Name: game.players[2].name,
+            player4Name: game.players[3].name,
+        });
+
         this._createdRows.forEach(row => row.parentNode.removeChild(row));
         this._createdRows = [];
 
@@ -30,6 +44,7 @@ export class GameBalanceTableView {
             let cumulativeBalance = game.getTotalBalance(round.roundIndex);
 
             let row = this.table.insertRow();
+            this.tbody.appendChild(row);
             this._createdRows.push(row);
 
             row.insertCell().appendChild(document.createTextNode(round.roundNumber));

@@ -3,7 +3,7 @@ import {dependencies, singleton, container} from 'needlepoint';
 export function domLoader(name) {
     return function() {
         let tmpl = container.resolve(TemplateContainer);
-        return new DomTemplate(name, tmpl);
+        return new DomTemplate(tmpl.create(name));
     }
 }
 
@@ -26,23 +26,54 @@ export class TemplateContainer {
             this._templates[tmplNode.dataset.name] = tmplNode;
         });
     }
+
+    getTemplateNames() {
+        return Object.keys(this._templates);
+    }
 }
+
+/**
+ * @typedef {Object} TemplateSlot
+ * @property {HTMLElement} node
+ * @property {String} name
+ */
+
 
 export class DomTemplate {
     /**
      *
-     * @param {String} name
-     * @param {TemplateContainer} templates
+     * @param {HTMLElement} template
      */
-    constructor(name, templates) {
-        this.name = name;
-        this.templates = templates;
+    constructor(template) {
+        this.template = template;
+
+        /**
+         * @type {Array<TemplateSlot>}
+         */
+        this._slots = this._findSlots(template);
+    }
+
+    _findSlots(element) {
+        return Array.from(element.querySelectorAll('[data-slot]')).map(slotNode => {
+            return {
+                node: slotNode,
+                name: slotNode.dataset.slot
+            }
+        })
+    }
+
+    fillSlots(slotValues) {
+        this._slots.forEach(slot => {
+            if(slot.name in slotValues) {
+                slot.node.textContent = slotValues[slot.name];
+            }
+        })
     }
 
     /**
      * @return {HTMLElement}
      */
-    clone() {
-        return this.templates.create(this.name);
+    getRoot() {
+        return this.template;
     }
 }

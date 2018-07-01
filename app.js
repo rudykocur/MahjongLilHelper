@@ -51,7 +51,7 @@ var MainAppUI = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)
     function MainAppUI(template, handCreator, balanceView) {
         _classCallCheck(this, MainAppUI);
 
-        this.root = template.clone();
+        this.root = template.getRoot();
 
         this.handCreator = handCreator;
         this.balanceTable = balanceView;
@@ -322,6 +322,11 @@ var Game = function () {
 
         this.rounds = [];
     }
+
+    /**
+     * @return {Round}
+     */
+
 
     _createClass(Game, [{
         key: 'createRound',
@@ -1545,13 +1550,22 @@ var GameBalanceTableView = exports.GameBalanceTableView = (_dec = (0, _needlepoi
      * @param {DomTemplate} template
      */
     function GameBalanceTableView(template) {
+        var _this = this;
+
         _classCallCheck(this, GameBalanceTableView);
 
-        this.table = this.root = template.clone();
+        this.template = template;
+        this.table = this.root = template.getRoot();
+        this.tbody = this.table.querySelector('tbody');
 
         this.onHandEditClick = new _utils.EventEmitter();
+        this.addRoundEvent = new _utils.EventEmitter();
 
         this._createdRows = [];
+
+        this.root.querySelector('[data-action="addRound"]').addEventListener('click', function () {
+            _this.addRoundEvent.emit();
+        });
     }
 
     /**
@@ -1563,7 +1577,14 @@ var GameBalanceTableView = exports.GameBalanceTableView = (_dec = (0, _needlepoi
     _createClass(GameBalanceTableView, [{
         key: "renderGameBalance",
         value: function renderGameBalance(game) {
-            var _this = this;
+            var _this2 = this;
+
+            this.template.fillSlots({
+                player1Name: game.players[0].name,
+                player2Name: game.players[1].name,
+                player3Name: game.players[2].name,
+                player4Name: game.players[3].name
+            });
 
             this._createdRows.forEach(function (row) {
                 return row.parentNode.removeChild(row);
@@ -1574,17 +1595,18 @@ var GameBalanceTableView = exports.GameBalanceTableView = (_dec = (0, _needlepoi
                 var balance = round.getRoundBalance();
                 var cumulativeBalance = game.getTotalBalance(round.roundIndex);
 
-                var row = _this.table.insertRow();
-                _this._createdRows.push(row);
+                var row = _this2.table.insertRow();
+                _this2.tbody.appendChild(row);
+                _this2._createdRows.push(row);
 
                 row.insertCell().appendChild(document.createTextNode(round.roundNumber));
 
-                var roundCells = _this._renderBalance(row, balance);
-                _this._renderBalance(row, cumulativeBalance);
+                var roundCells = _this2._renderBalance(row, balance);
+                _this2._renderBalance(row, cumulativeBalance);
 
                 roundCells.forEach(function (cell, index) {
                     cell.addEventListener('click', function () {
-                        _this.onHandEditClick.emit({
+                        _this2.onHandEditClick.emit({
                             round: round,
                             player: game.players[index]
                         });
@@ -1654,7 +1676,7 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
 
         _classCallCheck(this, HandCreatorView);
 
-        this.root = template.clone();
+        this.root = template.getRoot();
 
         this.onEditFinish = new _utils.EventEmitter();
 
@@ -1920,6 +1942,7 @@ var HandAddedTilesView = function HandAddedTilesView(tileset, tiles, revealed) {
     });
 
     var delButton = this.view.appendChild(document.createElement('li'));
+    delButton.classList.add('actionDelete');
 
     delButton.appendChild(document.createTextNode('X'));
     delButton.addEventListener('click', function () {
@@ -1950,7 +1973,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function domLoader(name) {
     return function () {
         var tmpl = _needlepoint.container.resolve(TemplateContainer);
-        return new DomTemplate(name, tmpl);
+        return new DomTemplate(tmpl.create(name));
     };
 }
 
@@ -1981,33 +2004,66 @@ var TemplateContainer = exports.TemplateContainer = (0, _needlepoint.singleton)(
                 _this._templates[tmplNode.dataset.name] = tmplNode;
             });
         }
+    }, {
+        key: 'getTemplateNames',
+        value: function getTemplateNames() {
+            return Object.keys(this._templates);
+        }
     }]);
 
     return TemplateContainer;
 }()) || _class;
 
+/**
+ * @typedef {Object} TemplateSlot
+ * @property {HTMLElement} node
+ * @property {String} name
+ */
+
 var DomTemplate = exports.DomTemplate = function () {
     /**
      *
-     * @param {String} name
-     * @param {TemplateContainer} templates
+     * @param {HTMLElement} template
      */
-    function DomTemplate(name, templates) {
+    function DomTemplate(template) {
         _classCallCheck(this, DomTemplate);
 
-        this.name = name;
-        this.templates = templates;
+        this.template = template;
+
+        /**
+         * @type {Array<TemplateSlot>}
+         */
+        this._slots = this._findSlots(template);
     }
 
-    /**
-     * @return {HTMLElement}
-     */
-
-
     _createClass(DomTemplate, [{
-        key: 'clone',
-        value: function clone() {
-            return this.templates.create(this.name);
+        key: '_findSlots',
+        value: function _findSlots(element) {
+            return Array.from(element.querySelectorAll('[data-slot]')).map(function (slotNode) {
+                return {
+                    node: slotNode,
+                    name: slotNode.dataset.slot
+                };
+            });
+        }
+    }, {
+        key: 'fillSlots',
+        value: function fillSlots(slotValues) {
+            this._slots.forEach(function (slot) {
+                if (slot.name in slotValues) {
+                    slot.node.textContent = slotValues[slot.name];
+                }
+            });
+        }
+
+        /**
+         * @return {HTMLElement}
+         */
+
+    }, {
+        key: 'getRoot',
+        value: function getRoot() {
+            return this.template;
         }
     }]);
 
