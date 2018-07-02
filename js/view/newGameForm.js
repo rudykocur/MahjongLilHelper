@@ -5,7 +5,7 @@ import {GamePanel} from "./gamePanel";
 import {Player} from "../game";
 
 
-@dependencies(domLoader('NewGameTemplate'))
+@dependencies(domLoader('newGameForm'))
 export class NewGameFormView extends GamePanel {
 
     /**
@@ -18,6 +18,7 @@ export class NewGameFormView extends GamePanel {
         this.cancelEvent = new EventEmitter();
 
         this.form = this.root.querySelector('form');
+        this.inputs = Array.from(this.form.querySelectorAll('input'));
 
         this.form.addEventListener('submit', e => {
             e.preventDefault();
@@ -29,7 +30,13 @@ export class NewGameFormView extends GamePanel {
             e.stopPropagation();
 
             this.cancelEvent.emit();
-        })
+        });
+    }
+
+    show() {
+        super.show();
+
+        this.inputs.forEach(input => input.value = '');
     }
 
     _getPlayers() {

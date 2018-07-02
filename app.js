@@ -47,7 +47,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * @property {Player} player
  */
 
-var MainAppUI = exports.MainAppUI = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)('AppTemplate'), _handCreator.HandCreatorView, _gameBalance.GameBalanceTableView, _gamesList.GamesListView, _newGameForm.NewGameFormView), _dec(_class = function () {
+var MainAppUI = exports.MainAppUI = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)('app'), _handCreator.HandCreatorView, _gameBalance.GameBalanceTableView, _gamesList.GamesListView, _newGameForm.NewGameFormView), _dec(_class = function () {
 
     /**
      * @param {DomTemplate} template
@@ -187,7 +187,6 @@ var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewControl
     }, {
         key: 'handleHandEditFinish',
         value: function handleHandEditFinish(event) {
-            // this.view.setMode(UI_MODE.table);
             this.view.showPanel(this.view.balanceTable);
 
             var hand = new _hand.Hand();
@@ -871,11 +870,7 @@ function game1() {
     var game = new _game.Game(players[0], players[1], players[2], players[3]);
 
     var round1 = game.createRound();
-    // round1.roundScores = [100, 200, 300, 400];
-
     var round2 = game.createRound();
-    // round2.roundScores = [200, 100, 50, 10];
-
     var round3 = game.createRound();
 
     return game;
@@ -1668,7 +1663,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var GameBalanceTableView = exports.GameBalanceTableView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)('GameBalanceTemplate')), _dec(_class = function (_GamePanel) {
+var GameBalanceTableView = exports.GameBalanceTableView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)('gameBalance')), _dec(_class = function (_GamePanel) {
     _inherits(GameBalanceTableView, _GamePanel);
 
     /**
@@ -1819,7 +1814,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var GamesListView = exports.GamesListView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)('GamesListTemplate')), _dec(_class = function (_GamePanel) {
+var GamesListView = exports.GamesListView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)('gamesList')), _dec(_class = function (_GamePanel) {
     _inherits(GamesListView, _GamePanel);
 
     /**
@@ -1912,7 +1907,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)('HandCreatorTemplate')), _dec(_class = function (_GamePanel) {
+var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)('hand')), _dec(_class = function (_GamePanel) {
     _inherits(HandCreatorView, _GamePanel);
 
     /**
@@ -2208,6 +2203,8 @@ exports.NewGameFormView = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _dec, _class;
 
 var _utils = require("../utils");
@@ -2226,7 +2223,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var NewGameFormView = exports.NewGameFormView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)('NewGameTemplate')), _dec(_class = function (_GamePanel) {
+var NewGameFormView = exports.NewGameFormView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)('newGameForm')), _dec(_class = function (_GamePanel) {
     _inherits(NewGameFormView, _GamePanel);
 
     /**
@@ -2241,6 +2238,7 @@ var NewGameFormView = exports.NewGameFormView = (_dec = (0, _needlepoint.depende
         _this.cancelEvent = new _utils.EventEmitter();
 
         _this.form = _this.root.querySelector('form');
+        _this.inputs = Array.from(_this.form.querySelectorAll('input'));
 
         _this.form.addEventListener('submit', function (e) {
             e.preventDefault();
@@ -2257,6 +2255,15 @@ var NewGameFormView = exports.NewGameFormView = (_dec = (0, _needlepoint.depende
     }
 
     _createClass(NewGameFormView, [{
+        key: "show",
+        value: function show() {
+            _get(NewGameFormView.prototype.__proto__ || Object.getPrototypeOf(NewGameFormView.prototype), "show", this).call(this);
+
+            this.inputs.forEach(function (input) {
+                return input.value = '';
+            });
+        }
+    }, {
         key: "_getPlayers",
         value: function _getPlayers() {
             return [new _game.Player(0, this.form.elements.player1Name.value), new _game.Player(1, this.form.elements.player2Name.value), new _game.Player(2, this.form.elements.player3Name.value), new _game.Player(3, this.form.elements.player4Name.value)];

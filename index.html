@@ -7,223 +7,124 @@
     <title>Mahjong Lil Helper</title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/foundation-sites@6.4.3/dist/css/foundation.min.css" integrity="sha256-GSio8qamaXapM8Fq9JYdGNTvk/dgs+cMLgPeevOYEx0= sha384-wAweiGTn38CY2DSwAaEffed6iMeflc0FMiuptanbN4J+ib+342gKGpvYRWubPd/+ sha512-QHEb6jOC8SaGTmYmGU19u2FhIfeG+t/hSacIWPpDzOp5yygnthL3JwnilM7LM1dOAbJv62R+/FICfsrKUqv4Gg==" crossorigin="anonymous">
+    <link rel="stylesheet" href="styles.css">
 
     <script src="app.js"></script>
 
-    <style>
-        table td, table th {
-            padding: 2px 4px;
-        }
-
-        table tr th:nth-child(5),
-        table tr td:nth-child(5) {
-            border-right: solid 3px black
-        }
-
-        table tr:nth-child(2n) td {
-            background-color: #e6e6e6;
-        }
-        
-        table .tableHeader th {
-            text-align: center;
-        }
-
-        table thead td {
-            text-align: right;
-        }
-
-        table tbody td:nth-child(n+2):nth-child(-n+5):hover {
-            cursor: pointer;
-            background: #ffffdc;
-        }
-        
-        table [data-action="addRound"] {
-            text-align: center;
-        }
-
-        table [data-action="addRound"]:hover {
-            cursor: pointer;
-            background: #ffffdc;
-        }
-
-        .suitGroups li,
-        .handContent li {
-            display: inline-block;
-
-            margin: 0 3px;
-        }
-
-        .suitGroups li {
-            border: solid 1px gray;
-        }
-
-        .handContent ul {
-            display: inline-block;
-            padding: 0 3px;
-            border: solid 1px gray;
-            margin: 3px;
-        }
-
-        .handContent .revealedSet {
-            background: #ececec;
-        }
-
-        .handContent .revealedSet li:nth-child(2) {
-            transform: rotate(90deg);
-        }
-
-        .suitGroups ul {
-            margin: 2px;
-            padding: 0;
-        }
-
-        .suitGroups li.selected {
-            background: #bff8ad;
-        }
-
-        .finishHandSection label {
-            display: block;
-        }
-
-        img.tile {
-            width: 3rem;
-            display: block;
-            padding: 3px;
-        }
-
-        .gamePanel.hidden {
-            display: none;
-        }
-
-        /*#handCreator {*/
-            /*display: none;*/
-        /*}*/
-
-        /*[data-mode="handCreator"] table {*/
-            /*display: none;*/
-        /*}*/
-
-        /*[data-mode="handCreator"] #handCreator {*/
-            /*display: block;*/
-        /*}*/
-    </style>
 </head>
 <body>
     <H1>Henlo!</H1>
     <div id="mahjongContent"></div>
 
-    <template data-name="AppTemplate">
-        <div></div>
-    </template>
+    <!-- inject:templates:html -->
+    <template data-name="app">
+    <div></div>
+</template>
+    <template data-name="gameBalance">
+<table cellspacing="0" cellpadding="0">
+    <thead>
+        <tr class="tableHeader">
+            <th></th>
+            <th colspan="4">Punktacja rundy</th>
+            <th colspan="4">Punktacja łączna</th>
+        </tr>
+        <tr>
+            <th>Runda</th>
+            <th data-slot="player1Name">Grzesiek</th>
+            <th data-slot="player2Name">Wojtek</th>
+            <th data-slot="player3Name">Gosia</th>
+            <th data-slot="player4Name">Ola</th>
+            <th data-slot="player1Name">Grzesiek</th>
+            <th data-slot="player2Name">Wojtek</th>
+            <th data-slot="player3Name">Gosia</th>
+            <th data-slot="player4Name">Ola</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot>
+        <tr>
+            <td>&nbsp;</td>
+            <td data-action="addRound" colspan="4">Dodaj rundę</td>
+        </tr>
+    </tfoot>
+</table>
+</template>
+    <template data-name="gamesList">
+    <div>
+        <h1>Mahjong Games List</h1>
+        <button class="button">Utwórz nową grę</button>
+        <ul class="gamesList"></ul>
+    </div>
+</template>
+    <template data-name="hand">
+<form id="handCreator">
+    <h2>Składanie ręki: <span data-slot="playerName"></span>, runda <span data-slot="roundNumber"></span></h2>
+    <div class="suitGroups"></div>
+    <div>
+        <fieldset>
+            Układ:
+            <input id="setRevealed" type="radio" name="revealed" checked value="1"> <label for="setRevealed">Odkryty</label>
+            <input id="setConcealed" type="radio" name="revealed" value=""> <label for="setConcealed">Zakryty</label>
+        </fieldset>
 
-    <template data-name="GameBalanceTemplate">
-        <table cellspacing="0" cellpadding="0">
-            <thead>
-            <tr class="tableHeader">
-                <th></th>
-                <th colspan="4">Punktacja rundy</th>
-                <th colspan="4">Punktacja łączna</th>
-            </tr>
-            <tr>
-                <th>Runda</th>
-                <th data-slot="player1Name">NAME HERE</th>
-                <th data-slot="player2Name">NAME HERE</th>
-                <th data-slot="player3Name">NAME HERE</th>
-                <th data-slot="player4Name">NAME HERE</th>
-                <th data-slot="player1Name">NAME HERE</th>
-                <th data-slot="player2Name">NAME HERE</th>
-                <th data-slot="player3Name">NAME HERE</th>
-                <th data-slot="player4Name">NAME HERE</th>
-            </tr>
-            </thead>
-            <tbody></tbody>
-            <tfoot>
-                <tr>
-                    <td>&nbsp;</td>
-                    <td data-action="addRound" colspan="4">Dodaj rundę</td>
-                </tr>
-            </tfoot>
-        </table>
-    </template>
-
-    <template data-name="HandCreatorTemplate">
-        <form id="handCreator">
-            <h2>Składanie ręki: <span data-slot="playerName"></span>, runda <span data-slot="roundNumber"></span></h2>
-            <div class="suitGroups"></div>
-            <div>
-                <fieldset>
-                    Układ:
-                    <input id="setRevealed" type="radio" name="revealed" checked value="1"> <label for="setRevealed">Odkryty</label>
-                    <input id="setConcealed" type="radio" name="revealed" value=""> <label for="setConcealed">Zakryty</label>
-                </fieldset>
-
-                <button class="button small" data-action="addPair">Para</button>
-                <button class="button small" data-action="addChow">Chow</button>
-                <button class="button small" data-action="addPung">Pung</button>
-                <button class="button small" data-action="addKong">Kong</button>
-                <button class="button small" data-action="addTiles">Luźne kamienie</button>
+        <button class="button small" data-action="addPair">Para</button>
+        <button class="button small" data-action="addChow">Chow</button>
+        <button class="button small" data-action="addPung">Pung</button>
+        <button class="button small" data-action="addKong">Kong</button>
+        <button class="button small" data-action="addTiles">Luźne kamienie</button>
+    </div>
+    <div class="handContent"></div>
+    <div class="finishHandSection">
+        <label><input name="isWinner" type="checkbox"> Mahjong</label>
+        <label><input name="lastTileFromWall" type="checkbox"> Ostatni kamień z muru</label>
+        <label><input name="lastTileSpecial" type="checkbox"> Zwycięstwo z dna morza/rzeki/na dachu</label>
+        <label><input name="lastAvailableTile" type="checkbox"> Majhong ostatnim możliwym kamieniem</label>
+        <button class="button small" data-action="finishHand">Zakończ tworzenie ręki</button>
+    </div>
+</form>
+</template>
+    <template data-name="newGameForm">
+<div>
+    <form>
+        <div class="grid-container">
+            <div class="grid-x grid-padding-x">
+                <div class="medium-6 cell">
+                    <label>Nazwa gracza 1
+                        <input type="text" name="player1Name">
+                    </label>
+                </div>
             </div>
-            <div class="handContent"></div>
-            <div class="finishHandSection">
-                <label><input name="isWinner" type="checkbox"> Mahjong</label>
-                <label><input name="lastTileFromWall" type="checkbox"> Ostatni kamień z muru</label>
-                <label><input name="lastTileSpecial" type="checkbox"> Zwycięstwo z dna morza/rzeki/na dachu</label>
-                <label><input name="lastAvailableTile" type="checkbox"> Majhong ostatnim możliwym kamieniem</label>
-                <button class="button small" data-action="finishHand">Zakończ tworzenie ręki</button>
+            <div class="grid-x grid-padding-x">
+                <div class="medium-6 cell">
+                    <label>Nazwa gracza 2
+                        <input type="text" name="player2Name">
+                    </label>
+                </div>
             </div>
-        </form>
-    </template>
-
-    <template data-name="GamesListTemplate">
-        <div>
-            <h1>Mahjong Games List</h1>
-            <button class="button">Utwórz nową grę</button>
-            <ul class="gamesList"></ul>
+            <div class="grid-x grid-padding-x">
+                <div class="medium-6 cell">
+                    <label>Nazwa gracza 3
+                        <input type="text" name="player3Name">
+                    </label>
+                </div>
+            </div>
+            <div class="grid-x grid-padding-x">
+                <div class="medium-6 cell">
+                    <label>Nazwa gracza 4
+                        <input type="text" name="player4Name">
+                    </label>
+                </div>
+            </div>
+            <div class="grid-x grid-padding-x">
+                <div class="medium-6 cell">
+                    <button name="submit" class="button">Dodaj</button>
+                    <button name="cancel" class="button">Anuluj</button>
+                </div>
+            </div>
         </div>
-    </template>
-
-    <template data-name="NewGameTemplate">
-        <div>
-        <form>
-            <div class="grid-container">
-                <div class="grid-x grid-padding-x">
-                    <div class="medium-6 cell">
-                        <label>Nazwa gracza 1
-                            <input type="text" name="player1Name">
-                        </label>
-                    </div>
-                </div>
-                <div class="grid-x grid-padding-x">
-                    <div class="medium-6 cell">
-                        <label>Nazwa gracza 2
-                            <input type="text" name="player2Name">
-                        </label>
-                    </div>
-                </div>
-                <div class="grid-x grid-padding-x">
-                    <div class="medium-6 cell">
-                        <label>Nazwa gracza 3
-                            <input type="text" name="player3Name">
-                        </label>
-                    </div>
-                </div>
-                <div class="grid-x grid-padding-x">
-                    <div class="medium-6 cell">
-                        <label>Nazwa gracza 4
-                            <input type="text" name="player4Name">
-                        </label>
-                    </div>
-                </div>
-                <div class="grid-x grid-padding-x">
-                    <div class="medium-6 cell">
-                        <button name="submit" class="button">Dodaj</button>
-                        <button name="cancel" class="button">Anuluj</button>
-                    </div>
-                </div>
-            </div>
-        </form>
-        </div>
-    </template>
-
+    </form>
+    </div>
+</template>
+    <!-- endinject -->
 </body>
 </html>

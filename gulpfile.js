@@ -3,11 +3,14 @@ const sourcemaps = require('gulp-sourcemaps');
 const mocha = require('gulp-mocha');
 const babel = require('gulp-babel');
 
-const babelify = require('babelify'),
+const path = require('path'),
+    rename = require('gulp-rename'),
+    babelify = require('babelify'),
     source = require('vinyl-source-stream'),
     buffer = require('vinyl-buffer'),
     uglify = require('gulp-uglify'),
-    browserify = require('browserify');
+    browserify = require('browserify'),
+    inject = require('gulp-inject');
 
 gulp.task('babel-src', () => {
     return gulp.src('js/**/*.js')
@@ -37,7 +40,21 @@ gulp.task('tests', ['babel'], function () {
         }));
 });
 
-gulp.task('default', () => {
+gulp.task('index', () => {
+    return gulp.src('./index.tmpl.html')
+        .pipe(rename('index.html'))
+      .pipe(inject(gulp.src(['./templates/*.html']), {
+        starttag: '<!-- inject:templates:{{ext}} -->',
+        transform: function (filePath, file) {
+          return file.contents.toString('utf8')
+              .replace('<body>', `<template data-name="${path.basename(filePath, '.html')}">`)
+              .replace('</body>', '</template>')
+        }
+      }))
+      .pipe(gulp.dest('./'));
+});
+
+gulp.task('default', ['index'], () => {
     return browserify({
         entries: ['./js/init.js'],
         debug: true})

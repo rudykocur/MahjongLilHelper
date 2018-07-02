@@ -28,7 +28,7 @@ import {NewGameFormView} from "./view/newGameForm";
  */
 
 
-@dependencies(domLoader('AppTemplate'), HandCreatorView, GameBalanceTableView, GamesListView, NewGameFormView)
+@dependencies(domLoader('app'), HandCreatorView, GameBalanceTableView, GamesListView, NewGameFormView)
 export class MainAppUI {
 
     /**

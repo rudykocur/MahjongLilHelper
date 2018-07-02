@@ -29,9 +29,7 @@ describe('DOM: new game form', () => {
      * @return {NewGameFormView}
      */
     function initDefaultView() {
-        let view = new NewGameFormView(tmpl);
-
-        return view;
+        return new NewGameFormView(tmpl);
     }
 
     it('Triggering newGameCreateEvent', () => {
@@ -74,4 +72,17 @@ describe('DOM: new game form', () => {
         expect(newGameCallback).not.called;
         expect(cancelCallback).calledOnce;
     });
+
+    it('Clear fields on form open', () => {
+        let view = initDefaultView();
+
+        driver.fillPlayer(0, 'Janek');
+        driver.fillPlayer(1, 'Helga');
+        driver.fillPlayer(2, 'Zenek');
+        driver.fillPlayer(3, 'Mietek');
+
+        view.show();
+
+        expect(driver.getPlayerNames()).to.be.eql(['', '', '', '']);
+    })
 });

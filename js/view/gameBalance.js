@@ -4,7 +4,7 @@ import {dependencies} from "needlepoint";
 import {GamePanel} from "./gamePanel";
 
 
-@dependencies(domLoader('GameBalanceTemplate'))
+@dependencies(domLoader('gameBalance'))
 export class GameBalanceTableView extends GamePanel{
 
     /**

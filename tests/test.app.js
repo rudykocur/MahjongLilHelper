@@ -295,5 +295,20 @@ describe('Main App tests', () => {
 
             expect(appView.gameList.loadGames).calledWithExactly(games);
         });
+
+        it('Return to game list after canceling new game form', () => {
+            let app = getApp();
+
+            appView.gameList.newGameEvent.emit();
+            appView.newGameForm.cancelEvent.emit();
+
+            expect(appView.showPanel.callCount).to.be.equal(3);
+            expect(appView.showPanel.firstCall).calledWithExactly(appView.gameList);
+            expect(appView.showPanel.secondCall).calledWithExactly(appView.newGameForm);
+            expect(appView.showPanel.thirdCall).calledWithExactly(appView.gameList);
+
+            expect(appView.gameList.loadGames).calledWithExactly(games);
+        });
+
     });
 });

@@ -4,7 +4,7 @@ import {dependencies} from "needlepoint";
 import {GamePanel} from "./gamePanel";
 
 
-@dependencies(domLoader('GamesListTemplate'))
+@dependencies(domLoader('gamesList'))
 export class GamesListView extends GamePanel{
 
     /**

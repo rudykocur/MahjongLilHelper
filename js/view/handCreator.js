@@ -5,7 +5,7 @@ import {domLoader} from "./templates.js";
 import {dependencies} from 'needlepoint';
 import {GamePanel} from "./gamePanel";
 
-@dependencies(domLoader('HandCreatorTemplate'))
+@dependencies(domLoader('hand'))
 class HandCreatorView extends GamePanel{
 
     /**

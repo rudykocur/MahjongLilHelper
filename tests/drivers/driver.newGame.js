@@ -5,8 +5,16 @@ export class NewGameViewDriver extends HTMLDriver {
         super(dom);
     }
 
+    _getNamesInputs() {
+        return Array.from(this.root.querySelectorAll('input'));
+    }
+
     fillPlayer(playerIndex, playerName) {
-        Array.from(this.root.querySelectorAll('input'))[playerIndex].value = playerName;
+        this._getNamesInputs()[playerIndex].value = playerName;
+    }
+
+    getPlayerNames() {
+        return this._getNamesInputs().map(input => input.value);
     }
 
     clickAdd() {
