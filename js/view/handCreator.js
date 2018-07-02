@@ -108,7 +108,7 @@ class HandCreatorView extends GamePanel{
         })
     }
 
-    show(round, player) {
+    showHand(round, player) {
         this.addedSets = [];
 
         this.refreshHandContent();

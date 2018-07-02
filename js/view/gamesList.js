@@ -48,7 +48,7 @@ export class GamesListView extends GamePanel{
      * @param {Game} game
      */
     _getGameLabel(game) {
-        return `Runda: ${game.rounds.length} - `+
+        return `Runda ${game.rounds.length}: `+
             `${game.players[0].name}, ${game.players[1].name}, ${game.players[2].name}, ${game.players[3].name}`;
     }
 }

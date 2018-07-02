@@ -5,7 +5,19 @@ export class GamesListViewDriver extends HTMLDriver {
         super(dom);
     }
 
+    _getGamesRows() {
+        return Array.from(this.root.querySelectorAll('li'));
+    }
+
     getGameTitles() {
-        return Array.from(this.root.querySelectorAll('li')).map(node => node.textContent);
+        return this._getGamesRows().map(node => node.textContent);
+    }
+
+    clickGame(gameIndex) {
+        this.click(this._getGamesRows()[gameIndex]);
+    }
+
+    clickNewGame() {
+        this.click('button');
     }
 }

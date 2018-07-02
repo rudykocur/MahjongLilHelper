@@ -3,6 +3,12 @@
 export class GamePanel {
     constructor(root) {
         this.root = root;
+
+        this.root.classList.add('gamePanel');
+    }
+
+    getRoot() {
+        return this.root;
     }
 
     show() {

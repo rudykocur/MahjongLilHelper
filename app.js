@@ -22,6 +22,12 @@ var _needlepoint = require('needlepoint');
 
 var _templates = require('./view/templates');
 
+var _gamesList = require('./view/gamesList');
+
+var _newGameForm = require('./view/newGameForm');
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 /**
@@ -41,36 +47,52 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * @property {Player} player
  */
 
-var UI_MODE = {
-    table: 'gameBalance',
-    hand: 'handCreator'
-};
-
-var MainAppUI = exports.MainAppUI = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)('AppTemplate'), _handCreator.HandCreatorView, _gameBalance.GameBalanceTableView), _dec(_class = function () {
+var MainAppUI = exports.MainAppUI = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)('AppTemplate'), _handCreator.HandCreatorView, _gameBalance.GameBalanceTableView, _gamesList.GamesListView, _newGameForm.NewGameFormView), _dec(_class = function () {
 
     /**
      * @param {DomTemplate} template
      * @param {HandCreatorView} handCreator
      * @param {GameBalanceTableView} balanceView
+     * @param {GamesListView} gameList
+     * @param {NewGameFormView} newGameForm
      */
-    function MainAppUI(template, handCreator, balanceView) {
+    function MainAppUI(template, handCreator, balanceView, gameList, newGameForm) {
+        var _this = this;
+
         _classCallCheck(this, MainAppUI);
 
         this.root = template.getRoot();
 
         this.handCreator = handCreator;
         this.balanceTable = balanceView;
+        this.gameList = gameList;
+        this.newGameForm = newGameForm;
 
-        this.root.appendChild(this.handCreator.root);
-        this.root.appendChild(this.balanceTable.root);
+        this.panels = [this.handCreator, this.balanceTable, this.gameList, this.newGameForm];
+        /**
+         *
+         * @type {GamePanel}
+         */
+        this.activePanel = null;
+
+        this.panels.forEach(function (panel) {
+            _this.root.appendChild(panel.getRoot());
+            panel.hide();
+        });
 
         this.handCreator.initUI();
     }
 
     _createClass(MainAppUI, [{
-        key: 'setMode',
-        value: function setMode(mode) {
-            this.root.setAttribute('data-mode', mode);
+        key: 'showPanel',
+        value: function showPanel(panel) {
+            if (this.activePanel) {
+                this.activePanel.hide();
+            }
+
+            this.activePanel = panel;
+
+            this.activePanel.show();
         }
     }, {
         key: 'mount',
@@ -87,7 +109,7 @@ var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewControl
      * @param {MainAppUI} view
      */
     function MahjongLilHelperMainViewController(view) {
-        var _this = this;
+        var _this2 = this;
 
         _classCallCheck(this, MahjongLilHelperMainViewController);
 
@@ -96,16 +118,38 @@ var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewControl
         /**
          * @type {Game}
          */
-        this.game = null;
+        this.currentGame = null;
+
+        /**
+         * @type {Array<Game>}
+         */
+        this.games = [];
+
+        this.view.gameList.gameSelectedEvent.addListener(function (game) {
+            _this2.loadGame(game);
+        });
+
+        this.view.gameList.newGameEvent.addListener(function () {
+            return _this2.view.showPanel(_this2.view.newGameForm);
+        });
+
+        this.view.newGameForm.cancelEvent.addListener(function () {
+            return _this2.view.showPanel(_this2.view.gameList);
+        });
+
+        this.view.newGameForm.newGameCreateEvent.addListener(function (players) {
+            return _this2.addNewGame(players);
+        });
 
         this.view.balanceTable.onHandEditClick.addListener(function ( /*OnHandEditEvent*/event) {
-            _this.view.setMode(UI_MODE.hand);
-            _this.view.handCreator.show(event.round, event.player);
+            _this2.view.showPanel(_this2.view.handCreator);
+
+            _this2.view.handCreator.showHand(event.round, event.player);
         });
 
         this.view.balanceTable.addRoundEvent.addListener(function () {
-            _this.game.createRound();
-            _this.view.balanceTable.renderGameBalance(_this.game);
+            _this2.currentGame.createRound();
+            _this2.view.balanceTable.renderGameBalance(_this2.currentGame);
         });
 
         this.view.handCreator.onEditFinish.addListener(this.handleHandEditFinish.bind(this));
@@ -113,11 +157,27 @@ var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewControl
 
     _createClass(MahjongLilHelperMainViewController, [{
         key: 'loadState',
-        value: function loadState(game) {
-            this.view.setMode(UI_MODE.table);
+        value: function loadState(games) {
+            this.view.showPanel(this.view.gameList);
 
-            this.game = game;
-            this.view.balanceTable.renderGameBalance(this.game);
+            this.games = games;
+            this.view.gameList.loadGames(this.games);
+        }
+    }, {
+        key: 'loadGame',
+        value: function loadGame(game) {
+            this.view.showPanel(this.view.balanceTable);
+            this.currentGame = game;
+            this.view.balanceTable.renderGameBalance(this.currentGame);
+        }
+    }, {
+        key: 'addNewGame',
+        value: function addNewGame(players) {
+            this.games.push(new (Function.prototype.bind.apply(_game.Game, [null].concat(_toConsumableArray(players))))());
+
+            this.view.showPanel(this.view.gameList);
+
+            this.view.gameList.loadGames(this.games);
         }
 
         /**
@@ -127,7 +187,8 @@ var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewControl
     }, {
         key: 'handleHandEditFinish',
         value: function handleHandEditFinish(event) {
-            this.view.setMode(UI_MODE.table);
+            // this.view.setMode(UI_MODE.table);
+            this.view.showPanel(this.view.balanceTable);
 
             var hand = new _hand.Hand();
             event.tilesets.forEach(function (set) {
@@ -139,14 +200,14 @@ var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewControl
                 event.round.setWinner(event.player, event.lastAvailableTile, event.lastTileFromWall);
             }
 
-            this.view.balanceTable.renderGameBalance(this.game);
+            this.view.balanceTable.renderGameBalance(this.currentGame);
         }
     }]);
 
     return MahjongLilHelperMainViewController;
 }()) || _class2);
 
-},{"./game.js":2,"./hand.js":3,"./view/gameBalance":7,"./view/handCreator.js":9,"./view/templates":10,"needlepoint":13}],2:[function(require,module,exports){
+},{"./game.js":2,"./hand.js":3,"./view/gameBalance":7,"./view/gamesList":9,"./view/handCreator.js":10,"./view/newGameForm":11,"./view/templates":12,"needlepoint":15}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -805,7 +866,7 @@ var _app = require("./app");
 
 var _needlepoint = require("needlepoint");
 
-document.addEventListener("DOMContentLoaded", function (event) {
+function game1() {
     var players = [new _game.Player(0, "Grzesiek"), new _game.Player(1, "Wojtek"), new _game.Player(2, "Gosia"), new _game.Player(3, "Ola")];
     var game = new _game.Game(players[0], players[1], players[2], players[3]);
 
@@ -817,6 +878,37 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     var round3 = game.createRound();
 
+    return game;
+}
+
+function game2() {
+    var players = [new _game.Player(0, "Grzesiek"), new _game.Player(1, "Ratusz"), new _game.Player(2, "Kasia"), new _game.Player(3, "Ola")];
+    var game = new _game.Game(players[0], players[1], players[2], players[3]);
+
+    var round1 = game.createRound();
+    // round1.roundScores = [100, 200, 300, 400];
+
+    // let round2 = game.createRound();
+    // // round2.roundScores = [200, 100, 50, 10];
+    //
+    // let round3 = game.createRound();
+
+    return game;
+}
+
+function game3() {
+    var players = [new _game.Player(0, "P1"), new _game.Player(1, "P2"), new _game.Player(2, "P3"), new _game.Player(3, "P4")];
+    var game = new _game.Game(players[0], players[1], players[2], players[3]);
+
+    // let round1 = game.createRound();
+
+    return game;
+}
+
+document.addEventListener("DOMContentLoaded", function (event) {
+
+    var games = [game1(), game2(), game3()];
+
     var tmpl = _needlepoint.container.resolve(_templates.TemplateContainer);
     tmpl.discover(document.body);
 
@@ -824,12 +916,12 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     ctrl.view.mount(document.getElementById('mahjongContent'));
 
-    ctrl.loadState(game);
+    ctrl.loadState(games);
 
     console.log('READY', ctrl);
 });
 
-},{"./app":1,"./game":2,"./view/templates":10,"needlepoint":13}],5:[function(require,module,exports){
+},{"./app":1,"./game":2,"./view/templates":12,"needlepoint":15}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1661,7 +1753,7 @@ var GameBalanceTableView = exports.GameBalanceTableView = (_dec = (0, _needlepoi
     return GameBalanceTableView;
 }(_gamePanel.GamePanel)) || _class);
 
-},{"../utils":6,"./gamePanel":8,"./templates":10,"needlepoint":13}],8:[function(require,module,exports){
+},{"../utils":6,"./gamePanel":8,"./templates":12,"needlepoint":15}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1677,9 +1769,16 @@ var GamePanel = exports.GamePanel = function () {
         _classCallCheck(this, GamePanel);
 
         this.root = root;
+
+        this.root.classList.add('gamePanel');
     }
 
     _createClass(GamePanel, [{
+        key: 'getRoot',
+        value: function getRoot() {
+            return this.root;
+        }
+    }, {
         key: 'show',
         value: function show() {
             this.root.classList.remove('hidden');
@@ -1695,6 +1794,95 @@ var GamePanel = exports.GamePanel = function () {
 }();
 
 },{}],9:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.GamesListView = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _dec, _class;
+
+var _utils = require("../utils");
+
+var _templates = require("./templates");
+
+var _needlepoint = require("needlepoint");
+
+var _gamePanel = require("./gamePanel");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var GamesListView = exports.GamesListView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)('GamesListTemplate')), _dec(_class = function (_GamePanel) {
+    _inherits(GamesListView, _GamePanel);
+
+    /**
+     * @param {DomTemplate} template
+     */
+    function GamesListView(template) {
+        _classCallCheck(this, GamesListView);
+
+        var _this = _possibleConstructorReturn(this, (GamesListView.__proto__ || Object.getPrototypeOf(GamesListView)).call(this, template.getRoot()));
+
+        _this.gameSelectedEvent = new _utils.EventEmitter();
+        _this.newGameEvent = new _utils.EventEmitter();
+
+        _this.gamesList = _this.root.querySelector('ul');
+
+        _this.root.querySelector('button').addEventListener('click', function () {
+            _this.newGameEvent.emit();
+        });
+        return _this;
+    }
+
+    /**
+     *
+     * @param {Array<Game>} gamesList
+     */
+
+
+    _createClass(GamesListView, [{
+        key: "loadGames",
+        value: function loadGames(gamesList) {
+            var _this2 = this;
+
+            while (this.gamesList.firstChild) {
+                this.gamesList.removeChild(this.gamesList.firstChild);
+            }
+
+            gamesList.forEach(function (game) {
+                var row = document.createElement('li');
+                row.textContent = _this2._getGameLabel(game);
+
+                row.addEventListener('click', function () {
+                    _this2.gameSelectedEvent.emit(game);
+                });
+
+                _this2.gamesList.appendChild(row);
+            });
+        }
+
+        /**
+         * @param {Game} game
+         */
+
+    }, {
+        key: "_getGameLabel",
+        value: function _getGameLabel(game) {
+            return "Runda " + game.rounds.length + ": " + (game.players[0].name + ", " + game.players[1].name + ", " + game.players[2].name + ", " + game.players[3].name);
+        }
+    }]);
+
+    return GamesListView;
+}(_gamePanel.GamePanel)) || _class);
+
+},{"../utils":6,"./gamePanel":8,"./templates":12,"needlepoint":15}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1838,8 +2026,8 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
             });
         }
     }, {
-        key: "show",
-        value: function show(round, player) {
+        key: "showHand",
+        value: function showHand(round, player) {
             var _this3 = this;
 
             this.addedSets = [];
@@ -2010,7 +2198,75 @@ var HandAddedTilesView = function HandAddedTilesView(tileset, tiles, revealed) {
 
 exports.HandCreatorView = HandCreatorView;
 
-},{"../hand.js":3,"../utils.js":6,"./gamePanel":8,"./templates.js":10,"needlepoint":13}],10:[function(require,module,exports){
+},{"../hand.js":3,"../utils.js":6,"./gamePanel":8,"./templates.js":12,"needlepoint":15}],11:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.NewGameFormView = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _dec, _class;
+
+var _utils = require("../utils");
+
+var _templates = require("./templates");
+
+var _needlepoint = require("needlepoint");
+
+var _gamePanel = require("./gamePanel");
+
+var _game = require("../game");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var NewGameFormView = exports.NewGameFormView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domLoader)('NewGameTemplate')), _dec(_class = function (_GamePanel) {
+    _inherits(NewGameFormView, _GamePanel);
+
+    /**
+     * @param {DomTemplate} template
+     */
+    function NewGameFormView(template) {
+        _classCallCheck(this, NewGameFormView);
+
+        var _this = _possibleConstructorReturn(this, (NewGameFormView.__proto__ || Object.getPrototypeOf(NewGameFormView)).call(this, template.getRoot()));
+
+        _this.newGameCreateEvent = new _utils.EventEmitter();
+        _this.cancelEvent = new _utils.EventEmitter();
+
+        _this.form = _this.root.querySelector('form');
+
+        _this.form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            _this.newGameCreateEvent.emit(_this._getPlayers());
+        });
+
+        _this.form.elements.cancel.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            _this.cancelEvent.emit();
+        });
+        return _this;
+    }
+
+    _createClass(NewGameFormView, [{
+        key: "_getPlayers",
+        value: function _getPlayers() {
+            return [new _game.Player(0, this.form.elements.player1Name.value), new _game.Player(1, this.form.elements.player2Name.value), new _game.Player(2, this.form.elements.player3Name.value), new _game.Player(3, this.form.elements.player4Name.value)];
+        }
+    }]);
+
+    return NewGameFormView;
+}(_gamePanel.GamePanel)) || _class);
+
+},{"../game":2,"../utils":6,"./gamePanel":8,"./templates":12,"needlepoint":15}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2128,7 +2384,7 @@ var DomTemplate = exports.DomTemplate = function () {
     return DomTemplate;
 }();
 
-},{"needlepoint":13}],11:[function(require,module,exports){
+},{"needlepoint":15}],13:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -2294,7 +2550,7 @@ var Container = (function () {
 })();
 
 exports.default = Container;
-},{}],12:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2320,7 +2576,7 @@ function dependencies() {
    * @package needlepoint
    * @copyright 2015 Andrew Munsell <andrew@wizardapps.net>
    */
-},{"./container":11}],13:[function(require,module,exports){
+},{"./container":13}],15:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2353,7 +2609,7 @@ Object.defineProperty(exports, 'dependencies', {
     return _dependencies.default;
   }
 });
-},{"./container":11,"./dependencies":12,"./singleton":14}],14:[function(require,module,exports){
+},{"./container":13,"./dependencies":14,"./singleton":16}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2373,6 +2629,6 @@ function singleton(Clazz) {
    * @package needlepoint
    * @copyright 2015 Andrew Munsell <andrew@wizardapps.net>
    */
-},{"./container":11}]},{},[4])
+},{"./container":13}]},{},[4])
 
 //# sourceMappingURL=app.js.map

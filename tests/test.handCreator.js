@@ -55,7 +55,7 @@ describe('DOM: hand creator tests', () => {
     function initDefaultView() {
         let view = new HandCreatorView(new HandCreatorTemplateMock(driver.root));
         view.initUI();
-        view.show(round, player);
+        view.showHand(round, player);
 
         return view;
     }
@@ -137,7 +137,7 @@ describe('DOM: hand creator tests', () => {
 
             let view = new HandCreatorView(new HandCreatorTemplateMock(driver.root));
             view.initUI();
-            view.show(round, player);
+            view.showHand(round, player);
 
             view.onEditFinish.addListener((/*OnEditFinishEvent*/ data) => {
                 let hand = getHand(data);

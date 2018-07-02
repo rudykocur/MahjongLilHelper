@@ -91,17 +91,21 @@
             padding: 3px;
         }
 
-        #handCreator {
+        .gamePanel.hidden {
             display: none;
         }
 
-        [data-mode="handCreator"] table {
-            display: none;
-        }
+        /*#handCreator {*/
+            /*display: none;*/
+        /*}*/
 
-        [data-mode="handCreator"] #handCreator {
-            display: block;
-        }
+        /*[data-mode="handCreator"] table {*/
+            /*display: none;*/
+        /*}*/
+
+        /*[data-mode="handCreator"] #handCreator {*/
+            /*display: block;*/
+        /*}*/
     </style>
 </head>
 <body>
@@ -168,6 +172,57 @@
                 <button class="button small" data-action="finishHand">Zakończ tworzenie ręki</button>
             </div>
         </form>
+    </template>
+
+    <template data-name="GamesListTemplate">
+        <div>
+            <h1>Mahjong Games List</h1>
+            <button class="button">Utwórz nową grę</button>
+            <ul class="gamesList"></ul>
+        </div>
+    </template>
+
+    <template data-name="NewGameTemplate">
+        <div>
+        <form>
+            <div class="grid-container">
+                <div class="grid-x grid-padding-x">
+                    <div class="medium-6 cell">
+                        <label>Nazwa gracza 1
+                            <input type="text" name="player1Name">
+                        </label>
+                    </div>
+                </div>
+                <div class="grid-x grid-padding-x">
+                    <div class="medium-6 cell">
+                        <label>Nazwa gracza 2
+                            <input type="text" name="player2Name">
+                        </label>
+                    </div>
+                </div>
+                <div class="grid-x grid-padding-x">
+                    <div class="medium-6 cell">
+                        <label>Nazwa gracza 3
+                            <input type="text" name="player3Name">
+                        </label>
+                    </div>
+                </div>
+                <div class="grid-x grid-padding-x">
+                    <div class="medium-6 cell">
+                        <label>Nazwa gracza 4
+                            <input type="text" name="player4Name">
+                        </label>
+                    </div>
+                </div>
+                <div class="grid-x grid-padding-x">
+                    <div class="medium-6 cell">
+                        <button name="submit" class="button">Dodaj</button>
+                        <button name="cancel" class="button">Anuluj</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        </div>
     </template>
 
 </body>
