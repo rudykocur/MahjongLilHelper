@@ -21,6 +21,9 @@ class Round {
 
         this.eastWindPlayer = players[this.roundIndex % 4];
 
+        /**
+         * @type {Player}
+         */
         this.winner = null;
         this.lastAvailableTile = false;
         this.lastTileFromWall = false;
@@ -126,6 +129,9 @@ class Game {
          */
         this.players = [p1, p2, p3, p4];
 
+        /**
+         * @type {Array<Round>}
+         */
         this.rounds = [];
     }
 

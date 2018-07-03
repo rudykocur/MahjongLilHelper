@@ -48,7 +48,12 @@ export class GamesListView extends GamePanel{
      * @param {Game} game
      */
     _getGameLabel(game) {
-        return `Runda ${game.rounds.length}: `+
-            `${game.players[0].name}, ${game.players[1].name}, ${game.players[2].name}, ${game.players[3].name}`;
+        let balance = game.getTotalBalance();
+
+        return `Runda ${game.rounds.length}: 
+            ${game.players[0].name} (${balance[0]}), 
+            ${game.players[1].name} (${balance[1]}), 
+            ${game.players[2].name} (${balance[2]}), 
+            ${game.players[3].name} (${balance[3]})`.replace(/\s+/g, ' ');
     }
 }

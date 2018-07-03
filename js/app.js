@@ -116,6 +116,12 @@ export class MahjongLilHelperMainViewController {
             this.view.balanceTable.renderGameBalance(this.currentGame);
         });
 
+        this.view.balanceTable.returnToGameListEvent.addListener(() => {
+            this.view.gameList.loadGames(this.games);
+
+            this.view.showPanel(this.view.gameList);
+        });
+
         this.view.handCreator.onEditFinish.addListener(this.handleHandEditFinish.bind(this));
     }
 

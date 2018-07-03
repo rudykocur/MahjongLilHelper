@@ -34,6 +34,10 @@ export class HTMLDriver {
     }
 }
 
+export function loadTemplateHtml(fileName) {
+    return jsdom.JSDOM.fromFile(`./templates/${fileName}`)
+}
+
 export function loadTestHtml(fileName) {
     return jsdom.JSDOM.fromFile(`./tests/test_html/${fileName}`)
 }

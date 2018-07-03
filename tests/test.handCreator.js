@@ -7,7 +7,7 @@ import {Player, Game} from "../js/game";
 const jsdom = require("jsdom");
 const expect = require('chai').expect;
 
-import {loadTestHtml} from "./utils";
+import {loadTemplateHtml} from "./utils";
 
 import {HandCreatorView} from '../js/view/handCreator.js';
 import {DomTemplate} from '../js/view/templates';
@@ -65,7 +65,7 @@ describe('DOM: hand creator tests', () => {
         round = game.createRound();
         player = game.players[0];
 
-        return loadTestHtml('hand.html').then((dom) => {
+        return loadTemplateHtml('hand.html').then((dom) => {
             driver = new HandCreatorViewDriver(dom);
         })
     });

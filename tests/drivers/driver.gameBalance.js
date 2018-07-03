@@ -51,4 +51,8 @@ export class GameBalanceViewDriver extends HTMLDriver {
     clickAddRoundButton() {
         this.click(this.root.querySelector('[data-action="addRound"]'));
     }
+
+    clickBackToGameList() {
+        this.click(this.root.querySelector('a'));
+    }
 }

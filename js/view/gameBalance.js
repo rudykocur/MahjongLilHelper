@@ -14,16 +14,22 @@ export class GameBalanceTableView extends GamePanel{
         super(template.getRoot());
 
         this.template = template;
-        this.table = template.getRoot();
+        this.table = this.root.querySelector('table');
         this.tbody = this.table.querySelector('tbody');
 
         this.onHandEditClick = new EventEmitter();
         this.addRoundEvent = new EventEmitter();
+        this.returnToGameListEvent = new EventEmitter();
 
         this._createdRows = [];
 
         this.root.querySelector('[data-action="addRound"]').addEventListener('click', () => {
             this.addRoundEvent.emit();
+        });
+
+        this.root.querySelector('a').addEventListener('click', e => {
+            e.preventDefault();
+            this.returnToGameListEvent.emit();
         })
     }
 

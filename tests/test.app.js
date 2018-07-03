@@ -35,6 +35,7 @@ describe('Main App tests', () => {
                 balanceTable: {
                     onHandEditClick: new EventEmitter(),
                     addRoundEvent: new EventEmitter(),
+                    returnToGameListEvent: new EventEmitter(),
                     renderGameBalance: sinon.fake(),
                 },
                 gameList: {
@@ -222,6 +223,7 @@ describe('Main App tests', () => {
                 balanceTable: {
                     onHandEditClick: new EventEmitter(),
                     addRoundEvent: new EventEmitter(),
+                    returnToGameListEvent: new EventEmitter(),
                     renderGameBalance: sinon.fake(),
                 },
                 gameList: {
@@ -309,6 +311,20 @@ describe('Main App tests', () => {
 
             expect(appView.gameList.loadGames).calledWithExactly(games);
         });
+
+        it('Return to game list after clicking back in game balance', () => {
+            let app = getApp();
+
+            appView.gameList.gameSelectedEvent.emit(games[1]);
+            appView.balanceTable.returnToGameListEvent.emit();
+
+            expect(appView.showPanel.callCount).to.be.equal(3);
+            expect(appView.showPanel.firstCall).calledWithExactly(appView.gameList);
+            expect(appView.showPanel.secondCall).calledWithExactly(appView.balanceTable);
+            expect(appView.showPanel.thirdCall).calledWithExactly(appView.gameList);
+
+            expect(appView.gameList.loadGames).calledWithExactly(games);
+        })
 
     });
 });

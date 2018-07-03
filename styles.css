@@ -81,3 +81,12 @@ img.tile {
 .gamePanel.hidden {
     display: none;
 }
+
+.gamesList li {
+    list-style: none;
+    cursor: pointer;
+}
+
+.gamesList li:hover {
+    background: #ffffdc;
+}

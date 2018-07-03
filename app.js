@@ -152,6 +152,12 @@ var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewControl
             _this2.view.balanceTable.renderGameBalance(_this2.currentGame);
         });
 
+        this.view.balanceTable.returnToGameListEvent.addListener(function () {
+            _this2.view.gameList.loadGames(_this2.games);
+
+            _this2.view.showPanel(_this2.view.gameList);
+        });
+
         this.view.handCreator.onEditFinish.addListener(this.handleHandEditFinish.bind(this));
     }
 
@@ -250,6 +256,9 @@ var Round = function () {
 
         this.eastWindPlayer = players[this.roundIndex % 4];
 
+        /**
+         * @type {Player}
+         */
         this.winner = null;
         this.lastAvailableTile = false;
         this.lastTileFromWall = false;
@@ -371,6 +380,9 @@ var Game = function () {
          */
         this.players = [p1, p2, p3, p4];
 
+        /**
+         * @type {Array<Round>}
+         */
         this.rounds = [];
     }
 
@@ -1675,16 +1687,22 @@ var GameBalanceTableView = exports.GameBalanceTableView = (_dec = (0, _needlepoi
         var _this = _possibleConstructorReturn(this, (GameBalanceTableView.__proto__ || Object.getPrototypeOf(GameBalanceTableView)).call(this, template.getRoot()));
 
         _this.template = template;
-        _this.table = template.getRoot();
+        _this.table = _this.root.querySelector('table');
         _this.tbody = _this.table.querySelector('tbody');
 
         _this.onHandEditClick = new _utils.EventEmitter();
         _this.addRoundEvent = new _utils.EventEmitter();
+        _this.returnToGameListEvent = new _utils.EventEmitter();
 
         _this._createdRows = [];
 
         _this.root.querySelector('[data-action="addRound"]').addEventListener('click', function () {
             _this.addRoundEvent.emit();
+        });
+
+        _this.root.querySelector('a').addEventListener('click', function (e) {
+            e.preventDefault();
+            _this.returnToGameListEvent.emit();
         });
         return _this;
     }
@@ -1870,7 +1888,9 @@ var GamesListView = exports.GamesListView = (_dec = (0, _needlepoint.dependencie
     }, {
         key: "_getGameLabel",
         value: function _getGameLabel(game) {
-            return "Runda " + game.rounds.length + ": " + (game.players[0].name + ", " + game.players[1].name + ", " + game.players[2].name + ", " + game.players[3].name);
+            var balance = game.getTotalBalance();
+
+            return ("Runda " + game.rounds.length + ": \n            " + game.players[0].name + " (" + balance[0] + "), \n            " + game.players[1].name + " (" + balance[1] + "), \n            " + game.players[2].name + " (" + balance[2] + "), \n            " + game.players[3].name + " (" + balance[3] + ")").replace(/\s+/g, ' ');
         }
     }]);
 
@@ -2304,6 +2324,11 @@ var TemplateContainer = exports.TemplateContainer = (0, _needlepoint.singleton)(
 
         this._templates = {};
     }
+
+    /**
+     * @return {HTMLElement}
+     */
+
 
     _createClass(TemplateContainer, [{
         key: 'create',

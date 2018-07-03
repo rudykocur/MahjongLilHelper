@@ -20,7 +20,7 @@ describe('DOM: TemplateContainer tests', () => {
         })
     });
 
-    it('rendering rows for each round', () => {
+    it('discovering templates in dom tree', () => {
         let tmpl = new TemplateContainer();
         tmpl.discover(html);
 

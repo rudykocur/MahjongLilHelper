@@ -8,7 +8,7 @@ const expect = require('chai').expect;
 const sinon = require('sinon');
 require('chai').use(require('sinon-chai'));
 
-import {loadTestHtml} from "./utils";
+import {loadTemplateHtml} from "./utils";
 
 import {NewGameFormView} from "../js/view/newGameForm";
 import {NewGameViewDriver} from "./drivers/driver.newGame";
@@ -19,7 +19,7 @@ describe('DOM: new game form', () => {
     let /*NewGameViewDriver*/driver, /*DomTemplate*/tmpl;
 
     beforeEach(() => {
-        return loadTestHtml('newGameForm.html').then((dom) => {
+        return loadTemplateHtml('newGameForm.html').then((dom) => {
             driver = new NewGameViewDriver(dom);
             tmpl = new DomTemplate(driver.root);
         })

@@ -13,6 +13,9 @@ export class TemplateContainer {
         this._templates = {};
     }
 
+    /**
+     * @return {HTMLElement}
+     */
     create(name) {
         let tmpl = this._templates[name];
         return document.importNode(tmpl.content, true).firstElementChild;

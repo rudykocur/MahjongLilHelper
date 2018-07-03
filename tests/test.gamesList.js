@@ -8,7 +8,7 @@ const expect = require('chai').expect;
 const sinon = require('sinon');
 require('chai').use(require('sinon-chai'));
 
-import {loadTestHtml} from "./utils";
+import {loadTemplateHtml} from "./utils";
 
 import {GamesListView} from "../js/view/gamesList";
 import {GamesListViewDriver} from "./drivers/driver.gamesList";
@@ -19,7 +19,7 @@ describe('DOM: games list', () => {
     let /*GamesListViewDriver*/driver, /*DomTemplate*/tmpl;
 
     beforeEach(() => {
-        return loadTestHtml('gamesList.html').then((dom) => {
+        return loadTemplateHtml('gamesList.html').then((dom) => {
             driver = new GamesListViewDriver(dom);
             tmpl = new DomTemplate(driver.root);
         })
@@ -50,8 +50,11 @@ describe('DOM: games list', () => {
 
         let games = createGames();
 
-        games[1].createRound();
-        games[1].createRound();
+        let round1 = games[1].createRound();
+        let round2 = games[1].createRound();
+
+        round1.setWinner(games[1].players[2], false, false);
+        round1.roundScores = [20, 100, 30, 40];
 
         games[0].createRound();
         games[0].createRound();
@@ -61,9 +64,9 @@ describe('DOM: games list', () => {
         view.loadGames(games);
 
         expect(driver.getGameTitles()).to.be.eql([
-            'Runda 4: P1, P2, P3, P4',
-            'Runda 2: P3, P1, P4, P2',
-            'Runda 0: Rudy, Wojtas, Gohcia, Zxully',
+            'Runda 4: P1 (0), P2 (0), P3 (0), P4 (0)',
+            'Runda 2: P3 (-260), P1 (190), P4 (120), P2 (-50)',
+            'Runda 0: Rudy (0), Wojtas (0), Gohcia (0), Zxully (0)',
         ])
     });
 

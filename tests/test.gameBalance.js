@@ -6,8 +6,10 @@ import {Player, Game} from "../js/game";
 
 const jsdom = require("jsdom");
 const expect = require('chai').expect;
+const sinon = require('sinon');
+require('chai').use(require('sinon-chai'));
 
-import {loadTestHtml} from "./utils";
+import {loadTemplateHtml} from "./utils";
 
 import {GameBalanceTableView} from "../js/view/gameBalance";
 import {GameBalanceViewDriver} from "./drivers/driver.gameBalance";
@@ -24,12 +26,6 @@ function getHand(event) {
 
 function createGame() {
     return new Game(new Player(0, 'P1'), new Player(1, 'P2'), new Player(2, 'P3'), new Player(3, 'P4'));
-}
-
-class GameBalanceTemplateMock extends DomTemplate {
-    constructor(root) {
-        super(root.querySelector('table'));
-    }
 }
 
 /**
@@ -63,7 +59,7 @@ describe('DOM: game balance table tests', () => {
         round2 = game.createRound();
         player = game.players[0];
 
-        return loadTestHtml('gameBalance.html').then((dom) => {
+        return loadTemplateHtml('gameBalance.html').then((dom) => {
             driver = new GameBalanceViewDriver(dom);
         })
     });
@@ -72,7 +68,7 @@ describe('DOM: game balance table tests', () => {
      * @return {GameBalanceTableView}
      */
     function initDefaultView() {
-        let view = new GameBalanceTableView(new GameBalanceTemplateMock(driver.root));
+        let view = new GameBalanceTableView(new DomTemplate(driver.root));
 
         view.renderGameBalance(game);
 
@@ -139,6 +135,18 @@ describe('DOM: game balance table tests', () => {
             });
 
             driver.clickAddRoundButton();
+        });
+
+        it('triggering returnToGameListEvent', () => {
+            let view = initDefaultView();
+
+            let callback = sinon.spy();
+
+            view.returnToGameListEvent.addListener(callback);
+
+            driver.clickBackToGameList();
+
+            expect(callback).calledOnce;
         })
     })
 });
