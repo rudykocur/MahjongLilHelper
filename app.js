@@ -1069,6 +1069,9 @@ var Hand = function () {
     function Hand() {
         _classCallCheck(this, Hand);
 
+        /**
+         * @type {Array<Tile>}
+         */
         this.tiles = [];
         this.sets = [];
     }
@@ -1172,18 +1175,22 @@ document.addEventListener("DOMContentLoaded", function (event) {
 });
 
 },{"./app":1,"./game":3,"./view/templates":13,"needlepoint":17}],6:[function(require,module,exports){
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
 exports.ScoreCalculator = undefined;
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _hand = require('./hand.js');
+var _hand = require("./hand.js");
 
 var h = _interopRequireWildcard(_hand);
+
+var _hand2 = require("./hand");
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -1222,9 +1229,17 @@ var ScoreCalculator = function () {
         this.multiplierRulesForWinner = multipliersForWinner;
     }
 
+    /**
+     *
+     * @param round
+     * @param player
+     * @return {{score,multipliers,points}}
+     */
+
+
     _createClass(ScoreCalculator, [{
-        key: 'calculateScore',
-        value: function calculateScore(round, player) {
+        key: "calculateExtendedScore",
+        value: function calculateExtendedScore(round, player) {
             var hand = round.getHand(player).hand;
 
             if (hand === null) {
@@ -1257,21 +1272,30 @@ var ScoreCalculator = function () {
                     var mult = rule.getMultipliers(hand, round, player);
 
                     if (mult) {
-                        appliedMultipliers.push({ rule: rule, multiplier: mult });
+                        appliedMultipliers.push({ rule: rule, amount: mult });
                     }
 
                     return value + (mult || 0);
                 }, multipliers);
             }
 
-            return applyMultipliers(multipliers, points);
+            return {
+                score: applyMultipliers(multipliers, points),
+                multipliers: appliedMultipliers,
+                points: appliedPoints
+            };
+        }
+    }, {
+        key: "calculateScore",
+        value: function calculateScore(round, player) {
+            return this.calculateExtendedScore(round, player).score;
         }
     }], [{
-        key: 'createDefaultScoreCalculator',
+        key: "createDefaultScoreCalculator",
         value: function createDefaultScoreCalculator() {
             var pointsRules = [new BonusTilePoints(), new PointsForPairOfRoundWindRule(), new PointsForPairOfOwnWindRule(), new PointsForPairOfDragonsRule(), new PointsForPungRule(), new PointsForKongRule(), new PointsForMahjong(), new PointsForLastAvailableTile(), new PointsForLastTileFromWall()];
             var multiplierRulesForAll = [new DragonSetMultiplier(), new RoundWindSetMultiplier(), new OwnWindSetMultiplier(), new ThreeConcealedPungsMultiplier(), new ThreeLittleSagesMultiplier(), new ThreeGrandSagesMultiplier(), new FourLittleBlessingsMultiplier(), new FourGrandBlessingsMultiplier()];
-            var multiplierRulesForWinner = [new PureChowsMultiplier(), new NoChowsMultiplier(), new HalfColorMultiplier()];
+            var multiplierRulesForWinner = [new PureChowsMultiplier(), new NoChowsMultiplier(), new HalfColorMultiplier(), new OnlyHonourTilesMultiplier(), new NoHonourSameSuitTiles()];
 
             return new ScoreCalculator(pointsRules, multiplierRulesForAll, multiplierRulesForWinner);
         }
@@ -1288,7 +1312,7 @@ var PointsRule = function () {
     }
 
     _createClass(PointsRule, [{
-        key: 'getPoints',
+        key: "getPoints",
         value: function getPoints(hand, round, player) {}
     }]);
 
@@ -1305,7 +1329,7 @@ var PointsForTilesetRule = function (_PointsRule) {
     }
 
     _createClass(PointsForTilesetRule, [{
-        key: 'getPoints',
+        key: "getPoints",
         value: function getPoints(hand, round, player) {
             var _this2 = this;
 
@@ -1314,7 +1338,7 @@ var PointsForTilesetRule = function (_PointsRule) {
             }, 0);
         }
     }, {
-        key: 'getTilesetValue',
+        key: "getTilesetValue",
         value: function getTilesetValue(tileSet, round, player) {
             return 0;
         }
@@ -1333,7 +1357,7 @@ var PointsForTileRule = function (_PointsRule2) {
     }
 
     _createClass(PointsForTileRule, [{
-        key: 'getPoints',
+        key: "getPoints",
         value: function getPoints(hand, round, player) {
             var _this4 = this;
 
@@ -1342,7 +1366,7 @@ var PointsForTileRule = function (_PointsRule2) {
             }, 0);
         }
     }, {
-        key: 'getTileValue',
+        key: "getTileValue",
         value: function getTileValue(tile) {
             return 0;
         }
@@ -1361,7 +1385,7 @@ var BonusTilePoints = function (_PointsForTileRule) {
     }
 
     _createClass(BonusTilePoints, [{
-        key: 'getTileValue',
+        key: "getTileValue",
         value: function getTileValue(tile) {
             if (tile instanceof h.BonusTile) {
                 return 4;
@@ -1382,7 +1406,7 @@ var PointsForPairOfDragonsRule = function (_PointsForTilesetRule) {
     }
 
     _createClass(PointsForPairOfDragonsRule, [{
-        key: 'getTilesetValue',
+        key: "getTilesetValue",
         value: function getTilesetValue(tileSet, round, player) {
             if (!(tileSet instanceof h.Pair)) {
                 return;
@@ -1407,7 +1431,7 @@ var PointsForPairOfRoundWindRule = function (_PointsForTilesetRule2) {
     }
 
     _createClass(PointsForPairOfRoundWindRule, [{
-        key: 'getTilesetValue',
+        key: "getTilesetValue",
         value: function getTilesetValue(tileSet, round) {
             if (!(tileSet instanceof h.Pair)) {
                 return;
@@ -1432,7 +1456,7 @@ var PointsForPairOfOwnWindRule = function (_PointsForTilesetRule3) {
     }
 
     _createClass(PointsForPairOfOwnWindRule, [{
-        key: 'getTilesetValue',
+        key: "getTilesetValue",
         value: function getTilesetValue(tileSet, round, player) {
             if (!(tileSet instanceof h.Pair)) {
                 return;
@@ -1457,7 +1481,7 @@ var PointsForPungRule = function (_PointsForTilesetRule4) {
     }
 
     _createClass(PointsForPungRule, [{
-        key: 'getTilesetValue',
+        key: "getTilesetValue",
         value: function getTilesetValue(tileSet, round, player) {
             if (tileSet instanceof h.Pung) {
                 return calcPungKongValue(2, tileSet);
@@ -1478,7 +1502,7 @@ var PointsForKongRule = function (_PointsForTilesetRule5) {
     }
 
     _createClass(PointsForKongRule, [{
-        key: 'getTilesetValue',
+        key: "getTilesetValue",
         value: function getTilesetValue(tileSet, round, player) {
             if (tileSet instanceof h.Kong) {
                 return calcPungKongValue(8, tileSet);
@@ -1499,7 +1523,7 @@ var PointsForMahjong = function (_PointsRule3) {
     }
 
     _createClass(PointsForMahjong, [{
-        key: 'getPoints',
+        key: "getPoints",
         value: function getPoints(hand, round, player) {
             if (round.winner === player) {
                 return 20;
@@ -1520,7 +1544,7 @@ var PointsForLastAvailableTile = function (_PointsRule4) {
     }
 
     _createClass(PointsForLastAvailableTile, [{
-        key: 'getPoints',
+        key: "getPoints",
         value: function getPoints(hand, round, player) {
             if (round.winner === player && round.lastAvailableTile) {
                 return 2;
@@ -1541,7 +1565,7 @@ var PointsForLastTileFromWall = function (_PointsRule5) {
     }
 
     _createClass(PointsForLastTileFromWall, [{
-        key: 'getPoints',
+        key: "getPoints",
         value: function getPoints(hand, round, player) {
             if (round.winner === player && round.lastTileFromWall) {
                 return 2;
@@ -1562,7 +1586,7 @@ var MultiplierRule = function () {
     }
 
     _createClass(MultiplierRule, [{
-        key: 'getMultipliers',
+        key: "getMultipliers",
         value: function getMultipliers(hand, round, player) {}
     }]);
 
@@ -1579,9 +1603,8 @@ var DragonSetMultiplier = function (_MultiplierRule) {
     }
 
     _createClass(DragonSetMultiplier, [{
-        key: 'getMultipliers',
+        key: "getMultipliers",
         value: function getMultipliers(hand) {
-
             return hand.getSetsOfType(h.Kong, h.DragonTile).concat(hand.getSetsOfType(h.Pung, h.DragonTile)).length;
         }
     }]);
@@ -1599,7 +1622,7 @@ var RoundWindSetMultiplier = function (_MultiplierRule2) {
     }
 
     _createClass(RoundWindSetMultiplier, [{
-        key: 'getMultipliers',
+        key: "getMultipliers",
         value: function getMultipliers(hand, round) {
             var windSets = hand.getSetsOfType(h.Kong, h.WindTile).concat(hand.getSetsOfType(h.Pung, h.WindTile));
 
@@ -1622,7 +1645,7 @@ var OwnWindSetMultiplier = function (_MultiplierRule3) {
     }
 
     _createClass(OwnWindSetMultiplier, [{
-        key: 'getMultipliers',
+        key: "getMultipliers",
         value: function getMultipliers(hand, round, player) {
             var windSets = hand.getSetsOfType(h.Kong, h.WindTile).concat(hand.getSetsOfType(h.Pung, h.WindTile));
 
@@ -1645,7 +1668,7 @@ var ThreeConcealedPungsMultiplier = function (_MultiplierRule4) {
     }
 
     _createClass(ThreeConcealedPungsMultiplier, [{
-        key: 'getMultipliers',
+        key: "getMultipliers",
         value: function getMultipliers(hand, round, player) {
             var pungs = hand.getSetsOfType(h.Pung).filter(function (tileSet) {
                 return !tileSet.isRevealed;
@@ -1670,7 +1693,7 @@ var ThreeLittleSagesMultiplier = function (_MultiplierRule5) {
     }
 
     _createClass(ThreeLittleSagesMultiplier, [{
-        key: 'getMultipliers',
+        key: "getMultipliers",
         value: function getMultipliers(hand, round, player) {
             var dragonSets = hand.getSetsOfType(h.Kong, h.DragonTile).concat(hand.getSetsOfType(h.Pung, h.DragonTile));
             var dragonPairs = hand.getSetsOfType(h.Pair, h.DragonTile);
@@ -1694,7 +1717,7 @@ var ThreeGrandSagesMultiplier = function (_MultiplierRule6) {
     }
 
     _createClass(ThreeGrandSagesMultiplier, [{
-        key: 'getMultipliers',
+        key: "getMultipliers",
         value: function getMultipliers(hand, round, player) {
             var dragonSets = hand.getSetsOfType(h.Kong, h.DragonTile).concat(hand.getSetsOfType(h.Pung, h.DragonTile));
 
@@ -1717,7 +1740,7 @@ var FourLittleBlessingsMultiplier = function (_MultiplierRule7) {
     }
 
     _createClass(FourLittleBlessingsMultiplier, [{
-        key: 'getMultipliers',
+        key: "getMultipliers",
         value: function getMultipliers(hand, round, player) {
             var windSets = hand.getSetsOfType(h.Kong, h.WindTile).concat(hand.getSetsOfType(h.Pung, h.WindTile));
             var windPairs = hand.getSetsOfType(h.Pair);
@@ -1741,7 +1764,7 @@ var FourGrandBlessingsMultiplier = function (_MultiplierRule8) {
     }
 
     _createClass(FourGrandBlessingsMultiplier, [{
-        key: 'getMultipliers',
+        key: "getMultipliers",
         value: function getMultipliers(hand, round, player) {
             var windSets = hand.getSetsOfType(h.Kong, h.WindTile).concat(hand.getSetsOfType(h.Pung, h.WindTile));
 
@@ -1767,7 +1790,7 @@ var PureChowsMultiplier = function (_MultiplierRule9) {
     }
 
     _createClass(PureChowsMultiplier, [{
-        key: 'getMultipliers',
+        key: "getMultipliers",
         value: function getMultipliers(hand, round, player) {
             var kongsAndPungs = hand.getSetsOfType(h.Kong).concat(hand.getSetsOfType(h.Pung));
 
@@ -1794,7 +1817,7 @@ var NoChowsMultiplier = function (_MultiplierRule10) {
     }
 
     _createClass(NoChowsMultiplier, [{
-        key: 'getMultipliers',
+        key: "getMultipliers",
         value: function getMultipliers(hand, round, player) {
             var chows = hand.getSetsOfType(h.Chow).length;
             var pungs = hand.getSetsOfType(h.Pung).length;
@@ -1819,7 +1842,7 @@ var HalfColorMultiplier = function (_MultiplierRule11) {
     }
 
     _createClass(HalfColorMultiplier, [{
-        key: 'getMultipliers',
+        key: "getMultipliers",
         value: function getMultipliers(hand, round, player) {
             var charTiles = hand.getTilesOfType(h.SuitTile).filter(function (tile) {
                 return tile.suit === h.Suits.CHARACTER;
@@ -1844,6 +1867,91 @@ var HalfColorMultiplier = function (_MultiplierRule11) {
     return HalfColorMultiplier;
 }(MultiplierRule);
 
+var OnlyHonourTilesMultiplier = function (_MultiplierRule12) {
+    _inherits(OnlyHonourTilesMultiplier, _MultiplierRule12);
+
+    function OnlyHonourTilesMultiplier() {
+        _classCallCheck(this, OnlyHonourTilesMultiplier);
+
+        return _possibleConstructorReturn(this, (OnlyHonourTilesMultiplier.__proto__ || Object.getPrototypeOf(OnlyHonourTilesMultiplier)).apply(this, arguments));
+    }
+
+    _createClass(OnlyHonourTilesMultiplier, [{
+        key: "getMultipliers",
+
+        /**
+         * @param {Hand} hand
+         * @param {Round} round
+         * @param {Player} player
+         */
+        value: function getMultipliers(hand, round, player) {
+            var importantTiles = hand.tiles.filter(function (t) {
+                return !(t instanceof _hand2.BonusTile);
+            });
+
+            if (importantTiles.length === 0) {
+                return 0;
+            }
+
+            var tiles = importantTiles.filter(function (t) {
+                return !t.isHonour;
+            });
+
+            if (tiles.length === 0) {
+                return 1;
+            }
+        }
+    }]);
+
+    return OnlyHonourTilesMultiplier;
+}(MultiplierRule);
+
+var NoHonourSameSuitTiles = function (_HalfColorMultiplier) {
+    _inherits(NoHonourSameSuitTiles, _HalfColorMultiplier);
+
+    function NoHonourSameSuitTiles() {
+        _classCallCheck(this, NoHonourSameSuitTiles);
+
+        return _possibleConstructorReturn(this, (NoHonourSameSuitTiles.__proto__ || Object.getPrototypeOf(NoHonourSameSuitTiles)).call(this));
+    }
+
+    /**
+     * @param {Hand} hand
+     * @param {Round} round
+     * @param {Player} player
+     */
+
+
+    _createClass(NoHonourSameSuitTiles, [{
+        key: "getMultipliers",
+        value: function getMultipliers(hand, round, player) {
+            var isHalfColor = _get(NoHonourSameSuitTiles.prototype.__proto__ || Object.getPrototypeOf(NoHonourSameSuitTiles.prototype), "getMultipliers", this).call(this, hand, round, player);
+
+            if (!isHalfColor) {
+                return 0;
+            }
+
+            var importantTiles = hand.tiles.filter(function (t) {
+                return !(t instanceof _hand2.BonusTile);
+            });
+
+            if (importantTiles.length === 0) {
+                return 0;
+            }
+
+            if (importantTiles.filter(function (t) {
+                return t.isHonour;
+            }).length > 0) {
+                return 0;
+            }
+
+            return 2;
+        }
+    }]);
+
+    return NoHonourSameSuitTiles;
+}(HalfColorMultiplier);
+
 //#endregion
 
 // module.exports = {ScoreCalculator};
@@ -1851,7 +1959,7 @@ var HalfColorMultiplier = function (_MultiplierRule11) {
 
 exports.ScoreCalculator = ScoreCalculator;
 
-},{"./hand.js":4}],7:[function(require,module,exports){
+},{"./hand":4,"./hand.js":4}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

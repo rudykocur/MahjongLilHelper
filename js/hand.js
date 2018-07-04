@@ -263,6 +263,9 @@ class FreeTiles extends TileSet {
 
 class Hand {
     constructor() {
+        /**
+         * @type {Array<Tile>}
+         */
         this.tiles = [];
         this.sets = [];
     }

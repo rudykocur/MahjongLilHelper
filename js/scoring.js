@@ -1,5 +1,6 @@
 
 import * as h from './hand.js';
+import {BonusTile} from "./hand";
 
 
 function calcPungKongValue(baseValue, tileSet) {
@@ -29,7 +30,12 @@ class ScoreCalculator {
         this.multiplierRulesForWinner = multipliersForWinner;
     }
 
-    calculateScore(round, player) {
+    /**
+     * @param round
+     * @param player
+     * @return {{score,multipliers,points}}
+     */
+    calculateExtendedScore(round, player) {
         let hand = round.getHand(player).hand;
 
         if(hand === null) {
@@ -62,14 +68,22 @@ class ScoreCalculator {
                 let mult = rule.getMultipliers(hand, round, player);
 
                 if(mult) {
-                    appliedMultipliers.push({rule: rule, multiplier: mult});
+                    appliedMultipliers.push({rule: rule, amount: mult});
                 }
 
                 return value + (mult || 0)
             }, multipliers);
         }
 
-        return applyMultipliers(multipliers, points);
+        return {
+            score: applyMultipliers(multipliers, points),
+            multipliers: appliedMultipliers,
+            points: appliedPoints,
+        };
+    }
+
+    calculateScore(round, player) {
+        return this.calculateExtendedScore(round, player).score
     }
 
     static createDefaultScoreCalculator() {
@@ -98,6 +112,8 @@ class ScoreCalculator {
             new PureChowsMultiplier(),
             new NoChowsMultiplier(),
             new HalfColorMultiplier(),
+            new OnlyHonourTilesMultiplier(),
+            new NoHonourSameSuitTiles(),
         ];
 
         return new ScoreCalculator(pointsRules, multiplierRulesForAll, multiplierRulesForWinner);
@@ -230,7 +246,6 @@ class MultiplierRule {
 
 class DragonSetMultiplier extends MultiplierRule {
     getMultipliers(hand) {
-
         return hand.getSetsOfType(h.Kong, h.DragonTile).concat(hand.getSetsOfType(h.Pung, h.DragonTile)).length;
     }
 }
@@ -359,6 +374,58 @@ class HalfColorMultiplier extends MultiplierRule {
         if(hasCharTiles + hasBambooTiles + hasCircleTiles === 1) {
             return 1;
         }
+    }
+}
+
+class OnlyHonourTilesMultiplier extends MultiplierRule {
+    /**
+     * @param {Hand} hand
+     * @param {Round} round
+     * @param {Player} player
+     */
+    getMultipliers(hand, round, player) {
+        let importantTiles = hand.tiles.filter(t => !(t instanceof BonusTile));
+
+        if(importantTiles.length === 0) {
+            return 0;
+        }
+
+        let tiles = importantTiles.filter(t => !t.isHonour);
+
+        if(tiles.length === 0) {
+            return 1;
+        }
+    }
+}
+
+class NoHonourSameSuitTiles extends HalfColorMultiplier {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @param {Hand} hand
+     * @param {Round} round
+     * @param {Player} player
+     */
+    getMultipliers(hand, round, player) {
+        let isHalfColor = super.getMultipliers(hand, round, player);
+
+        if(!isHalfColor) {
+            return 0;
+        }
+
+        let importantTiles = hand.tiles.filter(t => !(t instanceof BonusTile));
+
+        if(importantTiles.length === 0) {
+            return 0;
+        }
+
+        if(importantTiles.filter(t => t.isHonour).length > 0) {
+            return 0;
+        }
+
+        return 2;
     }
 }
 
