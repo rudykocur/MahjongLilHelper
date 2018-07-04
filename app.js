@@ -524,6 +524,10 @@ var Round = function () {
         this.roundIndex = roundIndex;
 
         this.balanceCalculator = new RoundBalanceCalculator();
+
+        /**
+         * @type {ScoreCalculator}
+         */
         this.scoreCalculator = score.ScoreCalculator.createDefaultScoreCalculator();
 
         this.windPhase = Math.floor(this.roundIndex / 4);
@@ -561,7 +565,7 @@ var Round = function () {
             this.lastTileFromWall = lastTileFromWall || false;
 
             this.players.forEach(function (player, index) {
-                _this.roundScores[index] = _this.scoreCalculator.calculateScore(_this, player);
+                _this.roundScores[index] = _this.scoreCalculator.calculateScore(_this, player) || 0;
             });
         }
     }, {
@@ -1230,7 +1234,6 @@ var ScoreCalculator = function () {
     }
 
     /**
-     *
      * @param round
      * @param player
      * @return {{score,multipliers,points}}
@@ -1280,7 +1283,7 @@ var ScoreCalculator = function () {
             }
 
             return {
-                score: applyMultipliers(multipliers, points),
+                score: Math.min(applyMultipliers(multipliers, points), 1000),
                 multipliers: appliedMultipliers,
                 points: appliedPoints
             };
@@ -1290,6 +1293,11 @@ var ScoreCalculator = function () {
         value: function calculateScore(round, player) {
             return this.calculateExtendedScore(round, player).score;
         }
+
+        /**
+         * @return {ScoreCalculator}
+         */
+
     }], [{
         key: "createDefaultScoreCalculator",
         value: function createDefaultScoreCalculator() {
@@ -2316,6 +2324,7 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
 
         _this.suitGroups = _this.root.querySelector('.suitGroups');
         _this.handContents = _this.root.querySelector('.handContent');
+        _this.handScoreRules = _this.root.querySelector('.handScoreRules');
 
         _this.handRevealedInput = _this.root.elements['revealed'];
         _this.isWinnerInput = _this.root.elements['isWinner'];
@@ -2411,6 +2420,12 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
                 _this2.suitGroups.appendChild(group);
             });
         }
+
+        /**
+         * @param {Round} round
+         * @param {Player} player
+         */
+
     }, {
         key: "showHand",
         value: function showHand(round, player) {
@@ -2426,6 +2441,10 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
                 hand.sets.forEach(function (s) {
                     return _this3.renderNewTileset(s);
                 });
+
+                var score = round.scoreCalculator.calculateExtendedScore(round, player);
+
+                this.renderScoreRules(score);
             }
 
             this.roundNumberSlot.textContent = round.roundNumber;
@@ -2437,15 +2456,36 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
             };
         }
     }, {
+        key: "renderScoreRules",
+        value: function renderScoreRules(score) {
+            var _ref,
+                _this4 = this;
+
+            while (this.handScoreRules.firstChild) {
+                this.handScoreRules.removeChild(this.handScoreRules.firstChild);
+            }
+
+            var rules = (_ref = []).concat.apply(_ref, _toConsumableArray(score.points.map(function (rule) {
+                return rule.rule.constructor.name + ": +" + rule.amount;
+            })).concat(_toConsumableArray(score.multipliers.map(function (rule) {
+                return rule.rule.constructor.name + ": x" + rule.amount;
+            }))));
+
+            rules.forEach(function (ruleStr) {
+                var ruleNode = _this4.handScoreRules.appendChild(document.createElement('div'));
+                ruleNode.textContent = ruleStr;
+            });
+        }
+    }, {
         key: "renderTileGroup",
         value: function renderTileGroup(tiles) {
-            var _this4 = this;
+            var _this5 = this;
 
             var result = document.createElement('ul');
 
             tiles.forEach(function (tile) {
                 var tileView = new HandCreatorTileView(tile);
-                _this4.allTiles.push(tileView);
+                _this5.allTiles.push(tileView);
                 result.appendChild(tileView.view);
             });
 
@@ -2473,13 +2513,13 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
     }, {
         key: "renderNewTileset",
         value: function renderNewTileset(tileset) {
-            var _this5 = this;
+            var _this6 = this;
 
             var view = this.renderNewTiles(tileset, tileset.tiles, tileset.isRevealed);
 
             view.onRemove.addListener(function () {
-                _this5.addedSets.splice(_this5.addedSets.indexOf(view), 1);
-                _this5.refreshHandContent();
+                _this6.addedSets.splice(_this6.addedSets.indexOf(view), 1);
+                _this6.refreshHandContent();
             });
 
             this.addedSets.push(view);
@@ -2496,14 +2536,14 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
     }, {
         key: "refreshHandContent",
         value: function refreshHandContent() {
-            var _this6 = this;
+            var _this7 = this;
 
             while (this.handContents.firstChild) {
                 this.handContents.removeChild(this.handContents.firstChild);
             }
 
             this.addedSets.forEach(function (setView) {
-                _this6.handContents.appendChild(setView.view);
+                _this7.handContents.appendChild(setView.view);
             });
         }
     }, {
@@ -2518,7 +2558,7 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
 
 var HandCreatorTileView = function () {
     function HandCreatorTileView(tile) {
-        var _this7 = this;
+        var _this8 = this;
 
         _classCallCheck(this, HandCreatorTileView);
 
@@ -2528,9 +2568,9 @@ var HandCreatorTileView = function () {
         this.view.appendChild((0, _utils2.renderTile)(tile));
 
         this.view.addEventListener('click', function () {
-            _this7.selected = !_this7.selected;
+            _this8.selected = !_this8.selected;
 
-            _this7.view.classList.toggle('selected', _this7.selected);
+            _this8.view.classList.toggle('selected', _this8.selected);
         });
     }
 
@@ -2546,7 +2586,7 @@ var HandCreatorTileView = function () {
 }();
 
 var HandAddedTilesView = function HandAddedTilesView(tileset, tiles, revealed) {
-    var _this8 = this;
+    var _this9 = this;
 
     _classCallCheck(this, HandAddedTilesView);
 
@@ -2561,7 +2601,7 @@ var HandAddedTilesView = function HandAddedTilesView(tileset, tiles, revealed) {
     }
 
     this.tiles.forEach(function (tile) {
-        var row = _this8.view.appendChild(document.createElement('li'));
+        var row = _this9.view.appendChild(document.createElement('li'));
         row.appendChild((0, _utils2.renderTile)(tile));
     });
 
@@ -2570,7 +2610,7 @@ var HandAddedTilesView = function HandAddedTilesView(tileset, tiles, revealed) {
 
     delButton.appendChild(document.createTextNode('X'));
     delButton.addEventListener('click', function () {
-        _this8.onRemove.emit();
+        _this9.onRemove.emit();
     });
 };
 

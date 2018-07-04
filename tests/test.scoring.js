@@ -335,12 +335,12 @@ describe('scoring multipliers', () => {
 
     it('three grand sages set', () => {
         hand.addSet(new Pung(true, Tiles.DragonRed));
-        hand.addSet(new Kong(false, Tiles.DragonWhite));
-        hand.addSet(new Pung(false, Tiles.DragonGreen));
+        hand.addSet(new Kong(true, Tiles.DragonWhite));
+        hand.addSet(new Pung(true, Tiles.DragonGreen));
 
         round.setHand(game.players[0], hand);
 
-        scoreHand(round, game.players[0], 1408);
+        scoreHand(round, game.players[0], (4+4+16) * 2 * 2 * 2 * 2 * 2);
     });
 
     it('four grand blessings set', () => {
@@ -425,6 +425,18 @@ describe('scoring multipliers', () => {
         round.setWinner(game.players[0], false, false);
 
         scoreHand(round, game.players[0], (20+2+2+2) * 2 * 2 * 2);
+    });
+
+    it('Applying round limit cap', () => {
+        hand.addSet(new Kong(false, Tiles.Character1));
+        hand.addSet(new Kong(false, Tiles.Character9));
+        hand.addSet(new Kong(false, Tiles.DragonGreen));
+        hand.addSet(new Kong(false, Tiles.DragonWhite));
+
+        round.setHand(game.players[0], hand);
+        round.setWinner(game.players[0], false, false);
+
+        scoreHand(round, game.players[0], 1000);
     })
 });
 

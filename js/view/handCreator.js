@@ -22,6 +22,7 @@ class HandCreatorView extends GamePanel{
 
         this.suitGroups = this.root.querySelector('.suitGroups');
         this.handContents = this.root.querySelector('.handContent');
+        this.handScoreRules = this.root.querySelector('.handScoreRules');
 
         this.handRevealedInput = this.root.elements['revealed'];
         this.isWinnerInput = this.root.elements['isWinner'];
@@ -109,6 +110,10 @@ class HandCreatorView extends GamePanel{
         })
     }
 
+    /**
+     * @param {Round} round
+     * @param {Player} player
+     */
     showHand(round, player) {
         this.addedSets = [];
 
@@ -118,6 +123,10 @@ class HandCreatorView extends GamePanel{
 
         if(hand) {
             hand.sets.forEach(s => this.renderNewTileset(s));
+
+            let score = round.scoreCalculator.calculateExtendedScore(round, player);
+
+            this.renderScoreRules(score);
         }
 
         this.roundNumberSlot.textContent = round.roundNumber;
@@ -127,6 +136,23 @@ class HandCreatorView extends GamePanel{
             player: player,
             round: round,
         }
+    }
+
+    renderScoreRules(score) {
+        while(this.handScoreRules.firstChild) {
+            this.handScoreRules.removeChild(this.handScoreRules.firstChild);
+        }
+
+        let rules = [].concat(
+            ...score.points.map(rule => `${rule.rule.constructor.name}: +${rule.amount}`),
+            ...score.multipliers.map(rule => `${rule.rule.constructor.name}: x${rule.amount}`)
+        );
+
+        rules.forEach(ruleStr => {
+            let ruleNode = this.handScoreRules.appendChild(document.createElement('div'));
+            ruleNode.textContent = ruleStr;
+        })
+
     }
 
     renderTileGroup(tiles) {

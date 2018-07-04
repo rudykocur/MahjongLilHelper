@@ -1,5 +1,6 @@
 import * as h from '../js/hand.js';
 import * as g from '../js/game.js';
+import {Hand, Kong, Pung, Tiles} from "../js/hand";
 
 const chai = require('chai');
 
@@ -78,7 +79,7 @@ describe('round arrangements', () => {
 
 describe('round balance calculations', function () {
 
-    let game, round, calc;
+    let game, /*Round*/round, calc;
 
     beforeEach(() => {
         game = createGame();
@@ -86,6 +87,24 @@ describe('round balance calculations', function () {
         round = game.createRound();
 
         calc = new g.RoundBalanceCalculator();
+    });
+
+    it('calculations on round 1 with real hand, winner p[0]', () => {
+        let handP1 = new Hand();
+        handP1.addSet(new Kong(false, Tiles.DragonWhite));
+        round.setHand(game.players[0], handP1);
+
+        let handP2 = new Hand();
+        handP2.addSet(new Pung(true, Tiles.WindEast));
+        round.setHand(game.players[1], handP2);
+
+        round.setWinner(game.players[0], false, false);
+
+        console.log(round.roundScores);
+
+        let balance = round.getRoundBalance();
+
+        chai.expect(balance).to.deep.equal([6*416, -416*2+8+8, -416*2-8, -416*2-8])
     });
 
     it('calculations on round 1, winner p[0]', () => {

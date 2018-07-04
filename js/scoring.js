@@ -76,7 +76,7 @@ class ScoreCalculator {
         }
 
         return {
-            score: applyMultipliers(multipliers, points),
+            score: Math.min(applyMultipliers(multipliers, points), 1000),
             multipliers: appliedMultipliers,
             points: appliedPoints,
         };
@@ -86,6 +86,9 @@ class ScoreCalculator {
         return this.calculateExtendedScore(round, player).score
     }
 
+    /**
+     * @return {ScoreCalculator}
+     */
     static createDefaultScoreCalculator() {
         let pointsRules = [
             new BonusTilePoints(),

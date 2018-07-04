@@ -14,6 +14,10 @@ class Round {
         this.roundIndex = roundIndex;
 
         this.balanceCalculator = new RoundBalanceCalculator();
+
+        /**
+         * @type {ScoreCalculator}
+         */
         this.scoreCalculator = score.ScoreCalculator.createDefaultScoreCalculator();
 
         this.windPhase = Math.floor(this.roundIndex/4);
@@ -51,7 +55,7 @@ class Round {
         this.lastTileFromWall = lastTileFromWall || false;
 
         this.players.forEach((player, index) => {
-            this.roundScores[index] = this.scoreCalculator.calculateScore(this, player);
+            this.roundScores[index] = this.scoreCalculator.calculateScore(this, player) || 0;
         });
     }
 

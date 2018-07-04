@@ -40,7 +40,6 @@ table [data-action="addRound"]:hover {
 .suitGroups li,
 .handContent li {
     display: inline-block;
-
     margin: 0 3px;
 }
 
@@ -53,6 +52,10 @@ table [data-action="addRound"]:hover {
     padding: 0 3px;
     border: solid 1px gray;
     margin: 3px;
+    float: left;
+    clear: left;
+    position: relative;
+    padding-right: 20px;
 }
 
 .handContent .revealedSet {
@@ -61,6 +64,17 @@ table [data-action="addRound"]:hover {
 
 .handContent .revealedSet li:nth-child(2) {
     transform: rotate(90deg);
+}
+
+.handContent .actionDelete {
+    position: absolute;
+    cursor: pointer;
+    padding:3px;
+    right: 3px;
+}
+
+.handContent .actionDelete:hover {
+    background: #ffffdc;
 }
 
 .suitGroups ul {
