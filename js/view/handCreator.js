@@ -4,6 +4,7 @@ import {domLoader} from "./templates.js";
 
 import {dependencies} from 'needlepoint';
 import {GamePanel} from "./gamePanel";
+import {renderTile} from "./utils";
 
 @dependencies(domLoader('hand'))
 class HandCreatorView extends GamePanel{
@@ -187,12 +188,7 @@ class HandCreatorView extends GamePanel{
     }
 }
 
-function renderTile(tile) {
-    let img = document.createElement('img');
-    img.classList.add('tile');
-    img.src = 'tiles/' + tile.toTypeString() + '.png';
-    return img;
-}
+
 
 class HandCreatorTileView {
     constructor(tile) {

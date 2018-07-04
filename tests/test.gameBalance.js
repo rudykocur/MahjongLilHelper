@@ -1,7 +1,7 @@
 import {DomTemplate} from "../js/view/templates";
 
 const mochaJsdom = require('mocha-jsdom');
-import {Hand} from "../js/hand";
+import {Hand, Tiles} from "../js/hand";
 import {Player, Game} from "../js/game";
 
 const jsdom = require("jsdom");
@@ -113,6 +113,26 @@ describe('DOM: game balance table tests', () => {
             view.renderGameBalance(game);
 
             assertRoundValues(driver, game, round1);
+        });
+
+        it('highlighting round winner', () => {
+            let view = initDefaultView();
+            round1.setWinner(game.players[1], false, false);
+            round1.roundScores = [100, 30, 50, 10];
+            view.renderGameBalance(game);
+
+            expect(driver.getWinnerPlayerIndex(round1)).to.be.equal(1);
+        });
+
+        it('showing round winds', () => {
+            let view = initDefaultView();
+            let round3 = game.createRound();
+            let round4 = game.createRound();
+            view.renderGameBalance(game);
+
+            expect(driver.getRoundWindTypeString(round1)).to.be.equal(Tiles.WindEast.toTypeString());
+            expect(driver.getRoundWindTypeString(round3)).to.be.equal(Tiles.WindEast.toTypeString());
+            expect(driver.getRoundWindTypeString(round4)).to.be.equal(Tiles.WindSouth.toTypeString());
         });
 
         it('triggering onHandEditClick event', (done) => {

@@ -2,6 +2,7 @@ import {EventEmitter} from "../utils";
 import {domLoader} from "./templates";
 import {dependencies} from "needlepoint";
 import {GamePanel} from "./gamePanel";
+import {renderTile} from "./utils";
 
 
 @dependencies(domLoader('gameBalance'))
@@ -56,11 +57,17 @@ export class GameBalanceTableView extends GamePanel{
             this._createdRows.push(row);
 
             row.insertCell().appendChild(document.createTextNode(round.roundNumber));
+            row.insertCell().appendChild(renderTile(round.windIndicator));
 
             let roundCells = this._renderBalance(row, balance);
             this._renderBalance(row, cumulativeBalance);
 
             roundCells.forEach((cell, index) => {
+
+                if(round.winner && round.winner.seatNumber === index) {
+                    cell.classList.add('winner');
+                }
+
                 cell.addEventListener('click', () => {
                     this.onHandEditClick.emit({
                         round: round,

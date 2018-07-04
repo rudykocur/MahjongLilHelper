@@ -231,7 +231,7 @@ var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewControl
     return MahjongLilHelperMainViewController;
 }()) || _class2);
 
-},{"./db":2,"./game.js":3,"./hand.js":4,"./view/gameBalance":8,"./view/gamesList":10,"./view/handCreator.js":11,"./view/newGameForm":12,"./view/templates":13,"needlepoint":16}],2:[function(require,module,exports){
+},{"./db":2,"./game.js":3,"./hand.js":4,"./view/gameBalance":8,"./view/gamesList":10,"./view/handCreator.js":11,"./view/newGameForm":12,"./view/templates":13,"needlepoint":17}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -286,7 +286,6 @@ var GameSerializer = exports.GameSerializer = function () {
         value: function serialize(game) {
             var _this = this;
 
-            console.log('OMG OMG THIS', this);
             var result = {
                 players: game.players.map(function (p) {
                     return { name: p.name, seatNumber: p.seatNumber };
@@ -488,7 +487,7 @@ var MahjongDatabase = exports.MahjongDatabase = (_dec = (0, _needlepoint.depende
     return MahjongDatabase;
 }()) || _class);
 
-},{"./game":3,"./hand":4,"needlepoint":16}],3:[function(require,module,exports){
+},{"./game":3,"./hand":4,"needlepoint":17}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -777,6 +776,11 @@ var Tile = function () {
             }
 
             return this.isHonour === other.isHonour;
+        }
+    }, {
+        key: 'toTypeString',
+        value: function toTypeString() {
+            '[Tile ' + this + ']';
         }
     }]);
 
@@ -1153,44 +1157,7 @@ var _app = require("./app");
 
 var _needlepoint = require("needlepoint");
 
-function game1() {
-    var players = [new _game.Player(0, "Grzesiek"), new _game.Player(1, "Wojtek"), new _game.Player(2, "Gosia"), new _game.Player(3, "Ola")];
-    var game = new _game.Game(players[0], players[1], players[2], players[3]);
-
-    var round1 = game.createRound();
-    var round2 = game.createRound();
-    var round3 = game.createRound();
-
-    return game;
-}
-
-function game2() {
-    var players = [new _game.Player(0, "Grzesiek"), new _game.Player(1, "Ratusz"), new _game.Player(2, "Kasia"), new _game.Player(3, "Ola")];
-    var game = new _game.Game(players[0], players[1], players[2], players[3]);
-
-    var round1 = game.createRound();
-    // round1.roundScores = [100, 200, 300, 400];
-
-    // let round2 = game.createRound();
-    // // round2.roundScores = [200, 100, 50, 10];
-    //
-    // let round3 = game.createRound();
-
-    return game;
-}
-
-function game3() {
-    var players = [new _game.Player(0, "P1"), new _game.Player(1, "P2"), new _game.Player(2, "P3"), new _game.Player(3, "P4")];
-    var game = new _game.Game(players[0], players[1], players[2], players[3]);
-
-    // let round1 = game.createRound();
-
-    return game;
-}
-
 document.addEventListener("DOMContentLoaded", function (event) {
-
-    var games = [game1(), game2(), game3()];
 
     var tmpl = _needlepoint.container.resolve(_templates.TemplateContainer);
     tmpl.discover(document.body);
@@ -1199,13 +1166,12 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     ctrl.view.mount(document.getElementById('mahjongContent'));
 
-    // ctrl.loadState(games);
     ctrl.load();
 
     console.log('READY', ctrl);
 });
 
-},{"./app":1,"./game":3,"./view/templates":13,"needlepoint":16}],6:[function(require,module,exports){
+},{"./app":1,"./game":3,"./view/templates":13,"needlepoint":17}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1946,6 +1912,8 @@ var _needlepoint = require("needlepoint");
 
 var _gamePanel = require("./gamePanel");
 
+var _utils2 = require("./utils");
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -2015,11 +1983,17 @@ var GameBalanceTableView = exports.GameBalanceTableView = (_dec = (0, _needlepoi
                 _this2._createdRows.push(row);
 
                 row.insertCell().appendChild(document.createTextNode(round.roundNumber));
+                row.insertCell().appendChild((0, _utils2.renderTile)(round.windIndicator));
 
                 var roundCells = _this2._renderBalance(row, balance);
                 _this2._renderBalance(row, cumulativeBalance);
 
                 roundCells.forEach(function (cell, index) {
+
+                    if (round.winner && round.winner.seatNumber === index) {
+                        cell.classList.add('winner');
+                    }
+
                     cell.addEventListener('click', function () {
                         _this2.onHandEditClick.emit({
                             round: round,
@@ -2043,7 +2017,7 @@ var GameBalanceTableView = exports.GameBalanceTableView = (_dec = (0, _needlepoi
     return GameBalanceTableView;
 }(_gamePanel.GamePanel)) || _class);
 
-},{"../utils":7,"./gamePanel":9,"./templates":13,"needlepoint":16}],9:[function(require,module,exports){
+},{"../utils":7,"./gamePanel":9,"./templates":13,"./utils":14,"needlepoint":17}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2174,7 +2148,7 @@ var GamesListView = exports.GamesListView = (_dec = (0, _needlepoint.dependencie
     return GamesListView;
 }(_gamePanel.GamePanel)) || _class);
 
-},{"../utils":7,"./gamePanel":9,"./templates":13,"needlepoint":16}],11:[function(require,module,exports){
+},{"../utils":7,"./gamePanel":9,"./templates":13,"needlepoint":17}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2195,6 +2169,8 @@ var _templates = require("./templates.js");
 var _needlepoint = require("needlepoint");
 
 var _gamePanel = require("./gamePanel");
+
+var _utils2 = require("./utils");
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
@@ -2422,14 +2398,6 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
     return HandCreatorView;
 }(_gamePanel.GamePanel)) || _class);
 
-
-function renderTile(tile) {
-    var img = document.createElement('img');
-    img.classList.add('tile');
-    img.src = 'tiles/' + tile.toTypeString() + '.png';
-    return img;
-}
-
 var HandCreatorTileView = function () {
     function HandCreatorTileView(tile) {
         var _this7 = this;
@@ -2439,7 +2407,7 @@ var HandCreatorTileView = function () {
         this.tile = tile;
         this.selected = false;
         this.view = document.createElement('li');
-        this.view.appendChild(renderTile(tile));
+        this.view.appendChild((0, _utils2.renderTile)(tile));
 
         this.view.addEventListener('click', function () {
             _this7.selected = !_this7.selected;
@@ -2476,7 +2444,7 @@ var HandAddedTilesView = function HandAddedTilesView(tileset, tiles, revealed) {
 
     this.tiles.forEach(function (tile) {
         var row = _this8.view.appendChild(document.createElement('li'));
-        row.appendChild(renderTile(tile));
+        row.appendChild((0, _utils2.renderTile)(tile));
     });
 
     var delButton = this.view.appendChild(document.createElement('li'));
@@ -2490,7 +2458,7 @@ var HandAddedTilesView = function HandAddedTilesView(tileset, tiles, revealed) {
 
 exports.HandCreatorView = HandCreatorView;
 
-},{"../hand.js":4,"../utils.js":7,"./gamePanel":9,"./templates.js":13,"needlepoint":16}],12:[function(require,module,exports){
+},{"../hand.js":4,"../utils.js":7,"./gamePanel":9,"./templates.js":13,"./utils":14,"needlepoint":17}],12:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2570,7 +2538,7 @@ var NewGameFormView = exports.NewGameFormView = (_dec = (0, _needlepoint.depende
     return NewGameFormView;
 }(_gamePanel.GamePanel)) || _class);
 
-},{"../game":3,"../utils":7,"./gamePanel":9,"./templates":13,"needlepoint":16}],13:[function(require,module,exports){
+},{"../game":3,"../utils":7,"./gamePanel":9,"./templates":13,"needlepoint":17}],13:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2693,7 +2661,26 @@ var DomTemplate = exports.DomTemplate = function () {
     return DomTemplate;
 }();
 
-},{"needlepoint":16}],14:[function(require,module,exports){
+},{"needlepoint":17}],14:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.renderTile = renderTile;
+/**
+ *
+ * @param {Tile} tile
+ * @return {HTMLImageElement}
+ */
+function renderTile(tile) {
+  var img = document.createElement('img');
+  img.classList.add('tile');
+  img.src = 'tiles/' + tile.toTypeString() + '.png';
+  return img;
+}
+
+},{}],15:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -2859,7 +2846,7 @@ var Container = (function () {
 })();
 
 exports.default = Container;
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2885,7 +2872,7 @@ function dependencies() {
    * @package needlepoint
    * @copyright 2015 Andrew Munsell <andrew@wizardapps.net>
    */
-},{"./container":14}],16:[function(require,module,exports){
+},{"./container":15}],17:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2918,7 +2905,7 @@ Object.defineProperty(exports, 'dependencies', {
     return _dependencies.default;
   }
 });
-},{"./container":14,"./dependencies":15,"./singleton":17}],17:[function(require,module,exports){
+},{"./container":15,"./dependencies":16,"./singleton":18}],18:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2938,6 +2925,6 @@ function singleton(Clazz) {
    * @package needlepoint
    * @copyright 2015 Andrew Munsell <andrew@wizardapps.net>
    */
-},{"./container":14}]},{},[5])
+},{"./container":15}]},{},[5])
 
 //# sourceMappingURL=app.js.map

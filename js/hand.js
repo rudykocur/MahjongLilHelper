@@ -47,6 +47,10 @@ class Tile {
 
         return this.isHonour === other.isHonour;
     }
+
+    toTypeString() {
+        `[Tile ${this}]`;
+    }
 }
 
 class SuitTile extends Tile {
