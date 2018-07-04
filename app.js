@@ -1979,14 +1979,24 @@ var GameBalanceTableView = exports.GameBalanceTableView = (_dec = (0, _needlepoi
                 var cumulativeBalance = game.getTotalBalance(round.roundIndex);
 
                 var row = _this2.table.insertRow();
+                var row2 = _this2.table.insertRow();
                 _this2.tbody.appendChild(row);
-                _this2._createdRows.push(row);
+                _this2.tbody.appendChild(row2);
 
-                row.insertCell().appendChild(document.createTextNode(round.roundNumber));
-                row.insertCell().appendChild((0, _utils2.renderTile)(round.windIndicator));
+                _this2._createdRows.push(row);
+                _this2._createdRows.push(row2);
+
+                var roundCell = row.insertCell();
+                var windCell = row.insertCell();
+
+                roundCell.rowSpan = 2;
+                windCell.rowSpan = 2;
+
+                roundCell.appendChild(document.createTextNode(round.roundNumber));
+                windCell.appendChild((0, _utils2.renderTile)(round.windIndicator));
 
                 var roundCells = _this2._renderBalance(row, balance);
-                _this2._renderBalance(row, cumulativeBalance);
+                _this2._renderBalance(row2, cumulativeBalance);
 
                 roundCells.forEach(function (cell, index) {
 

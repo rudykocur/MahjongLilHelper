@@ -53,14 +53,24 @@ export class GameBalanceTableView extends GamePanel{
             let cumulativeBalance = game.getTotalBalance(round.roundIndex);
 
             let row = this.table.insertRow();
+            let row2 = this.table.insertRow();
             this.tbody.appendChild(row);
-            this._createdRows.push(row);
+            this.tbody.appendChild(row2);
 
-            row.insertCell().appendChild(document.createTextNode(round.roundNumber));
-            row.insertCell().appendChild(renderTile(round.windIndicator));
+            this._createdRows.push(row);
+            this._createdRows.push(row2);
+
+            let roundCell = row.insertCell();
+            let windCell = row.insertCell();
+
+            roundCell.rowSpan = 2;
+            windCell.rowSpan = 2;
+
+            roundCell.appendChild(document.createTextNode(round.roundNumber));
+            windCell.appendChild(renderTile(round.windIndicator));
 
             let roundCells = this._renderBalance(row, balance);
-            this._renderBalance(row, cumulativeBalance);
+            this._renderBalance(row2, cumulativeBalance);
 
             roundCells.forEach((cell, index) => {
 

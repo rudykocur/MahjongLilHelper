@@ -2,9 +2,9 @@ table td, table th {
     padding: 2px 4px;
 }
 
-table tr th:nth-child(6),
-table tr td:nth-child(6) {
-    border-right: solid 3px black
+table tbody tr:nth-child(2n - 1) td:nth-child(n+1):nth-child(-n+2),
+table tbody tr:nth-child(2n) td {
+    border-bottom: solid 3px black
 }
 
 table tr:nth-child(2n) td {
@@ -19,13 +19,12 @@ table thead td {
     text-align: right;
 }
 
-table tbody td:nth-child(n+3):nth-child(-n+6):hover {
+table tbody tr:nth-child(2n - 1) td:nth-child(n+3):hover {
     cursor: pointer;
     background: #ffffdc;
 }
 
 table tbody .winner {
-    outline: solid 3px black;
     background: #bff8ad;
 }
 
