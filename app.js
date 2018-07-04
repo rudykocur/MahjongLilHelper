@@ -26,6 +26,8 @@ var _gamesList = require('./view/gamesList');
 
 var _newGameForm = require('./view/newGameForm');
 
+var _db = require('./db');
+
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -103,17 +105,19 @@ var MainAppUI = exports.MainAppUI = (_dec = (0, _needlepoint.dependencies)((0, _
 
     return MainAppUI;
 }()) || _class);
-var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewController = (_dec2 = (0, _needlepoint.dependencies)(MainAppUI), _dec2(_class2 = function () {
+var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewController = (_dec2 = (0, _needlepoint.dependencies)(MainAppUI, _db.MahjongDatabase), _dec2(_class2 = function () {
 
     /**
      * @param {MainAppUI} view
+     * @param {MahjongDatabase} db
      */
-    function MahjongLilHelperMainViewController(view) {
+    function MahjongLilHelperMainViewController(view, db) {
         var _this2 = this;
 
         _classCallCheck(this, MahjongLilHelperMainViewController);
 
         this.view = view;
+        this.db = db;
 
         /**
          * @type {Game}
@@ -149,6 +153,7 @@ var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewControl
 
         this.view.balanceTable.addRoundEvent.addListener(function () {
             _this2.currentGame.createRound();
+            _this2.save();
             _this2.view.balanceTable.renderGameBalance(_this2.currentGame);
         });
 
@@ -177,9 +182,21 @@ var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewControl
             this.view.balanceTable.renderGameBalance(this.currentGame);
         }
     }, {
+        key: 'load',
+        value: function load() {
+            this.loadState(this.db.load());
+        }
+    }, {
+        key: 'save',
+        value: function save() {
+            this.db.save(this.games);
+        }
+    }, {
         key: 'addNewGame',
         value: function addNewGame(players) {
             this.games.push(new (Function.prototype.bind.apply(_game.Game, [null].concat(_toConsumableArray(players))))());
+
+            this.save();
 
             this.view.showPanel(this.view.gameList);
 
@@ -205,6 +222,8 @@ var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewControl
                 event.round.setWinner(event.player, event.lastAvailableTile, event.lastTileFromWall);
             }
 
+            this.save();
+
             this.view.balanceTable.renderGameBalance(this.currentGame);
         }
     }]);
@@ -212,7 +231,264 @@ var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewControl
     return MahjongLilHelperMainViewController;
 }()) || _class2);
 
-},{"./game.js":2,"./hand.js":3,"./view/gameBalance":7,"./view/gamesList":9,"./view/handCreator.js":10,"./view/newGameForm":11,"./view/templates":12,"needlepoint":15}],2:[function(require,module,exports){
+},{"./db":2,"./game.js":3,"./hand.js":4,"./view/gameBalance":8,"./view/gamesList":10,"./view/handCreator.js":11,"./view/newGameForm":12,"./view/templates":13,"needlepoint":16}],2:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.MahjongDatabase = exports.GameSerializer = exports.LocalStorageDriver = undefined;
+
+var _dec, _class;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _needlepoint = require("needlepoint");
+
+var _hand = require("./hand");
+
+var _game = require("./game");
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var LocalStorageDriver = exports.LocalStorageDriver = function () {
+    function LocalStorageDriver() {
+        _classCallCheck(this, LocalStorageDriver);
+    }
+
+    _createClass(LocalStorageDriver, [{
+        key: "getDriver",
+
+        /**
+         * @return {Storage}
+         */
+        value: function getDriver() {
+            return window.localStorage;
+        }
+    }]);
+
+    return LocalStorageDriver;
+}();
+
+var GameSerializer = exports.GameSerializer = function () {
+    function GameSerializer() {
+        _classCallCheck(this, GameSerializer);
+    }
+
+    _createClass(GameSerializer, [{
+        key: "serialize",
+
+        /**
+         * @param {Game} game
+         */
+        value: function serialize(game) {
+            var _this = this;
+
+            console.log('OMG OMG THIS', this);
+            var result = {
+                players: game.players.map(function (p) {
+                    return { name: p.name, seatNumber: p.seatNumber };
+                }),
+                rounds: game.rounds.map(function (round) {
+                    return {
+                        winner: round.winner ? round.winner.seatNumber : null,
+                        lastAvailableTile: round.lastAvailableTile,
+                        lastTileFromWall: round.lastTileFromWall,
+                        hands: round.hands.map(function (hand) {
+                            return hand.hand ? _this._serializeHand(hand.hand) : null;
+                        })
+                    };
+                })
+            };
+
+            return result;
+        }
+    }, {
+        key: "deserialize",
+        value: function deserialize(gameJson) {
+            var _this2 = this;
+
+            var players = gameJson.players.map(function (playerData) {
+                return new _game.Player(playerData.seatNumber, playerData.name);
+            });
+
+            var game = new (Function.prototype.bind.apply(_game.Game, [null].concat(_toConsumableArray(players))))();
+
+            gameJson.rounds.forEach(function (roundData) {
+                var round = game.createRound();
+
+                roundData.hands.forEach(function (handData, playerIndex) {
+                    if (handData === null) {
+                        return;
+                    }
+
+                    var hand = new _hand.Hand();
+
+                    handData.forEach(function (setData) {
+                        hand.addSet(_this2._deserializeTileset(setData));
+                    });
+
+                    round.setHand(players[playerIndex], hand);
+                });
+
+                if (roundData.winner !== null) {
+                    round.setWinner(players[roundData.winner], roundData.lastAvailableTile, roundData.lastTileFromWall);
+                }
+            });
+
+            return game;
+        }
+
+        /**
+         * @param {Hand} hand
+         */
+
+    }, {
+        key: "_serializeHand",
+        value: function _serializeHand(hand) {
+            return hand.sets.map(this._serializeTileset, this);
+        }
+
+        /**
+         * @param {TileSet} tileset
+         */
+
+    }, {
+        key: "_serializeTileset",
+        value: function _serializeTileset(tileset) {
+            var _this3 = this;
+
+            if (tileset instanceof _hand.Kong) {
+                return {
+                    type: 'kong',
+                    isRevealed: tileset.isRevealed,
+                    tile: this._getTileCode(tileset.getTile())
+                };
+            }
+
+            if (tileset instanceof _hand.Pung) {
+                return {
+                    type: 'pung',
+                    isRevealed: tileset.isRevealed,
+                    tile: this._getTileCode(tileset.getTile())
+                };
+            }
+
+            if (tileset instanceof _hand.Chow) {
+                return {
+                    type: 'chow',
+                    isRevealed: tileset.isRevealed,
+                    tiles: tileset.tiles.map(function (tile) {
+                        return _this3._getTileCode(tile);
+                    })
+                };
+            }
+
+            if (tileset instanceof _hand.Pair) {
+                return {
+                    type: 'pair',
+                    tile: this._getTileCode(tileset.getTile())
+                };
+            }
+
+            if (tileset instanceof _hand.FreeTiles) {
+                return {
+                    type: 'free',
+                    tiles: tileset.tiles.map(function (tile) {
+                        return _this3._getTileCode(tile);
+                    })
+                };
+            }
+        }
+
+        /**
+         * @param {Tile} tile
+         */
+
+    }, {
+        key: "_getTileCode",
+        value: function _getTileCode(tile) {
+            return Object.keys(_hand.Tiles).map(function (tileKey) {
+                if (_hand.Tiles[tileKey].equals(tile)) {
+                    return tileKey;
+                }
+            }).filter(function (key) {
+                return key;
+            })[0];
+        }
+    }, {
+        key: "_deserializeTileset",
+        value: function _deserializeTileset(setData) {
+            if (setData.type === 'kong') {
+                return new _hand.Kong(setData.isRevealed, _hand.Tiles[setData.tile]);
+            }
+
+            if (setData.type === 'pung') {
+                return new _hand.Pung(setData.isRevealed, _hand.Tiles[setData.tile]);
+            }
+
+            if (setData.type === 'chow') {
+                return new _hand.Chow(setData.isRevealed, _hand.Tiles[setData.tiles[0]], _hand.Tiles[setData.tiles[1]], _hand.Tiles[setData.tiles[2]]);
+            }
+
+            if (setData.type === 'pair') {
+                return new _hand.Pair(_hand.Tiles[setData.tile]);
+            }
+
+            if (setData.type === 'free') {
+                return new _hand.FreeTiles(setData.tiles.map(function (tile) {
+                    return _hand.Tiles[tile];
+                }));
+            }
+        }
+    }]);
+
+    return GameSerializer;
+}();
+
+var MahjongDatabase = exports.MahjongDatabase = (_dec = (0, _needlepoint.dependencies)(LocalStorageDriver, GameSerializer), _dec(_class = function () {
+
+    /**
+     * @param {LocalStorageDriver} storage
+     * @param {GameSerializer} serializer
+     */
+    function MahjongDatabase(storage, serializer) {
+        _classCallCheck(this, MahjongDatabase);
+
+        this.storage = storage.getDriver();
+        this.serializer = serializer;
+
+        this.storageKey = 'mahjongGames';
+    }
+
+    _createClass(MahjongDatabase, [{
+        key: "load",
+        value: function load() {
+            var gamesStr = this.storage.getItem(this.storageKey);
+
+            var games = JSON.parse(gamesStr);
+
+            if (games !== null) {
+                return games.map(this.serializer.deserialize, this.serializer);
+            }
+
+            return [];
+        }
+    }, {
+        key: "save",
+        value: function save(games) {
+            var gamesArr = games.map(this.serializer.serialize, this.serializer);
+
+            this.storage.setItem(this.storageKey, JSON.stringify(gamesArr));
+        }
+    }]);
+
+    return MahjongDatabase;
+}()) || _class);
+
+},{"./game":3,"./hand":4,"needlepoint":16}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -431,7 +707,7 @@ exports.Round = Round;
 exports.Player = Player;
 exports.RoundBalanceCalculator = RoundBalanceCalculator;
 
-},{"./hand.js":3,"./scoring.js":5}],3:[function(require,module,exports){
+},{"./hand.js":4,"./scoring.js":6}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -866,7 +1142,7 @@ exports.FreeTiles = FreeTiles;
 exports.WindOrder = WindOrder;
 exports.TileGroups = TileGroups;
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 "use strict";
 
 var _templates = require("./view/templates");
@@ -923,12 +1199,13 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     ctrl.view.mount(document.getElementById('mahjongContent'));
 
-    ctrl.loadState(games);
+    // ctrl.loadState(games);
+    ctrl.load();
 
     console.log('READY', ctrl);
 });
 
-},{"./app":1,"./game":2,"./view/templates":12,"needlepoint":15}],5:[function(require,module,exports){
+},{"./app":1,"./game":3,"./view/templates":13,"needlepoint":16}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1608,7 +1885,7 @@ var HalfColorMultiplier = function (_MultiplierRule11) {
 
 exports.ScoreCalculator = ScoreCalculator;
 
-},{"./hand.js":3}],6:[function(require,module,exports){
+},{"./hand.js":4}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1649,7 +1926,7 @@ var EventEmitter = function () {
 
 exports.EventEmitter = EventEmitter;
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1766,7 +2043,7 @@ var GameBalanceTableView = exports.GameBalanceTableView = (_dec = (0, _needlepoi
     return GameBalanceTableView;
 }(_gamePanel.GamePanel)) || _class);
 
-},{"../utils":6,"./gamePanel":8,"./templates":12,"needlepoint":15}],8:[function(require,module,exports){
+},{"../utils":7,"./gamePanel":9,"./templates":13,"needlepoint":16}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1806,7 +2083,7 @@ var GamePanel = exports.GamePanel = function () {
     return GamePanel;
 }();
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1897,7 +2174,7 @@ var GamesListView = exports.GamesListView = (_dec = (0, _needlepoint.dependencie
     return GamesListView;
 }(_gamePanel.GamePanel)) || _class);
 
-},{"../utils":6,"./gamePanel":8,"./templates":12,"needlepoint":15}],10:[function(require,module,exports){
+},{"../utils":7,"./gamePanel":9,"./templates":13,"needlepoint":16}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2213,7 +2490,7 @@ var HandAddedTilesView = function HandAddedTilesView(tileset, tiles, revealed) {
 
 exports.HandCreatorView = HandCreatorView;
 
-},{"../hand.js":3,"../utils.js":6,"./gamePanel":8,"./templates.js":12,"needlepoint":15}],11:[function(require,module,exports){
+},{"../hand.js":4,"../utils.js":7,"./gamePanel":9,"./templates.js":13,"needlepoint":16}],12:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2293,7 +2570,7 @@ var NewGameFormView = exports.NewGameFormView = (_dec = (0, _needlepoint.depende
     return NewGameFormView;
 }(_gamePanel.GamePanel)) || _class);
 
-},{"../game":2,"../utils":6,"./gamePanel":8,"./templates":12,"needlepoint":15}],12:[function(require,module,exports){
+},{"../game":3,"../utils":7,"./gamePanel":9,"./templates":13,"needlepoint":16}],13:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2416,7 +2693,7 @@ var DomTemplate = exports.DomTemplate = function () {
     return DomTemplate;
 }();
 
-},{"needlepoint":15}],13:[function(require,module,exports){
+},{"needlepoint":16}],14:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -2582,7 +2859,7 @@ var Container = (function () {
 })();
 
 exports.default = Container;
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2608,7 +2885,7 @@ function dependencies() {
    * @package needlepoint
    * @copyright 2015 Andrew Munsell <andrew@wizardapps.net>
    */
-},{"./container":13}],15:[function(require,module,exports){
+},{"./container":14}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2641,7 +2918,7 @@ Object.defineProperty(exports, 'dependencies', {
     return _dependencies.default;
   }
 });
-},{"./container":13,"./dependencies":14,"./singleton":16}],16:[function(require,module,exports){
+},{"./container":14,"./dependencies":15,"./singleton":17}],17:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2661,6 +2938,6 @@ function singleton(Clazz) {
    * @package needlepoint
    * @copyright 2015 Andrew Munsell <andrew@wizardapps.net>
    */
-},{"./container":13}]},{},[4])
+},{"./container":14}]},{},[5])
 
 //# sourceMappingURL=app.js.map

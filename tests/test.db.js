@@ -1,5 +1,5 @@
 import {Game, Player} from "../js/game";
-import {GameSerializer} from "../js/db";
+import {GameSerializer, MahjongDatabase} from "../js/db";
 import {Chow, FreeTiles, Hand, Kong, Pair, Pung, Tiles} from "../js/hand";
 
 const expect = require('chai').expect;
@@ -90,6 +90,56 @@ describe('Database access tests', () => {
                     lastTileFromWall: false,
                     hands: [null, null, null, null]
                 },
+            ]
+        };
+
+        expect(gameJson).to.be.eql(expectedGameJson);
+    });
+
+    it('serialize partial round', () => {
+        let serializer = new GameSerializer();
+
+        let game = createGame();
+        let round1 = game.createRound();
+
+        let p1r1Hand = new Hand();
+        p1r1Hand.addSet(new Pung(true, Tiles.Bamboo3));
+        p1r1Hand.addSet(new Kong(false, Tiles.Bamboo2));
+        round1.setHand(game.players[0], p1r1Hand);
+
+        round1.setWinner(game.players[0], false, false);
+
+        let gameJson = serializer.serialize(game);
+
+        let expectedGameJson = {
+            players: [
+                {name: 'P1', seatNumber: 0},
+                {name: 'P2', seatNumber: 1},
+                {name: 'P3', seatNumber: 2},
+                {name: 'P4', seatNumber: 3},
+            ],
+            rounds: [
+                {
+                    winner: 0,
+                    lastAvailableTile: false,
+                    lastTileFromWall: false,
+                    hands: [
+                        [  // Player 1 hand, round 1
+                            {
+                                type: 'pung',
+                                isRevealed: true,
+                                tile: 'Bamboo3',
+                            },
+                            {
+                                type: 'kong',
+                                isRevealed: false,
+                                tile: 'Bamboo2',
+                            }
+                        ],
+                        null,
+                        null,
+                        null]
+                }
             ]
         };
 
@@ -201,5 +251,72 @@ describe('Database access tests', () => {
         expect(round2.getHand(loadedGame.players[1]).hand).to.be.eql(null);
         expect(round2.getHand(loadedGame.players[2]).hand).to.be.eql(null);
         expect(round2.getHand(loadedGame.players[3]).hand).to.be.eql(null);
+    });
+
+    it('test loading games from database', () => {
+        let storageMock = {
+            getItem: sinon.fake(() => '[{"data": "foo"}, {"data": "bar"}]')
+        };
+
+        let storageDriverMock = {
+            getDriver: sinon.fake(() => storageMock)
+        };
+
+        let serializerMock = {
+            deserialize: sinon.spy(data => data)
+        };
+
+        let db = new MahjongDatabase(storageDriverMock, serializerMock);
+        let games = db.load();
+
+        expect(storageMock.getItem).calledOnce;
+        expect(serializerMock.deserialize).calledTwice;
+
+        expect(storageMock.getItem).calledWithExactly('mahjongGames');
+
+        expect(games).to.be.eql([
+            {data: "foo"},
+            {data: "bar"}
+        ])
+    });
+
+    it('test loading empty data from storage', () => {
+        let storageMock = {
+            getItem: sinon.fake(() => null)
+        };
+
+        let storageDriverMock = {
+            getDriver: sinon.fake(() => storageMock)
+        };
+
+        let serializerMock = {
+            deserialize: sinon.spy(data => data)
+        };
+
+        let db = new MahjongDatabase(storageDriverMock, serializerMock);
+        let games = db.load();
+    });
+
+    it('test saving games to database', () => {
+        let storageMock = {
+            setItem: sinon.fake()
+        };
+
+        let storageDriverMock = {
+            getDriver: sinon.fake(() => storageMock)
+        };
+
+        let serializerMock = {
+            serialize: sinon.spy(data => data)
+        };
+
+        let db = new MahjongDatabase(storageDriverMock, serializerMock);
+
+        db.save([{data: 'game1'}, {data: 'game2'}]);
+
+        expect(storageMock.setItem).calledOnce;
+        expect(serializerMock.serialize).calledTwice;
+
+        expect(storageMock.setItem).calledWithExactly('mahjongGames', '[{"data":"game1"},{"data":"game2"}]');
     })
 });

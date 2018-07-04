@@ -66,7 +66,7 @@ export class GameSerializer {
      * @param {Hand} hand
      */
     _serializeHand(hand) {
-        return hand.sets.map(this._serializeTileset.bind(this));
+        return hand.sets.map(this._serializeTileset, this);
     }
 
     /**
@@ -167,11 +167,15 @@ export class MahjongDatabase {
 
         let games = JSON.parse(gamesStr);
 
-        return games.map(this.serializer.deserialize);
+        if(games !== null) {
+            return games.map(this.serializer.deserialize, this.serializer);
+        }
+
+        return [];
     }
 
     save(games) {
-        let gamesArr = games.map(this.serializer.serialize);
+        let gamesArr = games.map(this.serializer.serialize, this.serializer);
 
         this.storage.setItem(this.storageKey, JSON.stringify(gamesArr));
     }

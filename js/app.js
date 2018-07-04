@@ -8,6 +8,7 @@ import {dependencies} from 'needlepoint';
 import {domLoader} from "./view/templates";
 import {GamesListView} from "./view/gamesList";
 import {NewGameFormView} from "./view/newGameForm";
+import {MahjongDatabase} from "./db";
 
 
 /**
@@ -76,14 +77,16 @@ export class MainAppUI {
     }
 }
 
-@dependencies(MainAppUI)
+@dependencies(MainAppUI, MahjongDatabase)
 export class MahjongLilHelperMainViewController {
 
     /**
      * @param {MainAppUI} view
+     * @param {MahjongDatabase} db
      */
-    constructor(view) {
+    constructor(view, db) {
         this.view = view;
+        this.db = db;
 
         /**
          * @type {Game}
@@ -113,6 +116,7 @@ export class MahjongLilHelperMainViewController {
 
         this.view.balanceTable.addRoundEvent.addListener(() => {
             this.currentGame.createRound();
+            this.save();
             this.view.balanceTable.renderGameBalance(this.currentGame);
         });
 
@@ -138,8 +142,18 @@ export class MahjongLilHelperMainViewController {
         this.view.balanceTable.renderGameBalance(this.currentGame);
     }
 
+    load() {
+        this.loadState(this.db.load());
+    }
+
+    save() {
+        this.db.save(this.games);
+    }
+
     addNewGame(players) {
         this.games.push(new Game(...players));
+
+        this.save();
 
         this.view.showPanel(this.view.gameList);
 
@@ -159,6 +173,8 @@ export class MahjongLilHelperMainViewController {
         if(event.isWinner) {
             event.round.setWinner(event.player, event.lastAvailableTile, event.lastTileFromWall);
         }
+
+        this.save();
 
         this.view.balanceTable.renderGameBalance(this.currentGame);
     }

@@ -18,7 +18,7 @@ describe('Main App tests', () => {
 
     describe('Game controller tests', () => {
 
-        let /*Game*/game, /*Round*/round, player, /*MainAppUI*/appView;
+        let /*Game*/game, /*Round*/round, player, /*MainAppUI*/appView, /*MahjongDatabase*/dbMock;
 
         beforeEach(() => {
             game = createGame();
@@ -48,10 +48,98 @@ describe('Main App tests', () => {
                     cancelEvent: new EventEmitter(),
                 }
             };
+
+            dbMock = {
+                load: sinon.fake(() => [game]),
+                save: sinon.fake(),
+            }
+        });
+
+        /**
+         * @return {MahjongLilHelperMainViewController}
+         */
+        function getApp(myDbMock) {
+            return new MahjongLilHelperMainViewController(appView, myDbMock || dbMock);
+        }
+
+        it('app load games from database', () => {
+            let app = getApp();
+
+            app.load();
+
+            expect(dbMock.load).calledOnce;
+            expect(appView.gameList.loadGames).calledWithExactly([game]);
+        });
+
+        it('app initalizes on empty database state', () => {
+            let temporaryDbMock = {
+                load: sinon.fake(() => []),
+            };
+
+            let app = getApp(temporaryDbMock);
+
+            app.load();
+        });
+
+        it('app saves state after new game added', () => {
+            let app = getApp();
+
+            app.load();
+
+            let newPlayers = [
+                new Player(0, 'A'),
+                new Player(1, 'S'),
+                new Player(2, 'D'),
+                new Player(3, 'F'),
+            ];
+
+            appView.gameList.newGameEvent.emit();
+            appView.newGameForm.newGameCreateEvent.emit(newPlayers);
+
+            expect(dbMock.save).calledOnce;
+
+            expect(dbMock.save).calledWithExactly([game, new Game(...newPlayers)]);
+        });
+
+        it('app saves state after new round added', () => {
+            let app = getApp();
+
+            app.load();
+
+            appView.gameList.gameSelectedEvent.emit(game);
+            appView.balanceTable.addRoundEvent.emit();
+
+            expect(dbMock.save).calledOnce;
+            expect(dbMock.save).calledWithExactly([game]);
+        });
+
+        it('app saves state after updating player hand', () => {
+            let app = getApp();
+
+            app.load();
+
+            appView.gameList.gameSelectedEvent.emit(game);
+            appView.balanceTable.onHandEditClick.emit({
+                round: round,
+                player: game.players[2],
+            });
+
+            appView.handCreator.onEditFinish.emit({
+                round: round,
+                player: game.players[2],
+                tilesets: [],
+                isWinner: false,
+                lastTileFromWall: false,
+                lastTileSpecial: false,
+                lastAvailableTile: false
+            });
+
+            expect(dbMock.save).calledOnce;
+            expect(dbMock.save).calledWithExactly([game]);
         });
 
         it('app loads game state into table', () => {
-            let app = new MahjongLilHelperMainViewController(appView);
+            let app = getApp();
 
             app.loadGame(game);
 
@@ -60,7 +148,7 @@ describe('Main App tests', () => {
         });
 
         it('app opens hand creator after onHandEditClick', () => {
-            let app = new MahjongLilHelperMainViewController(appView);
+            let app = getApp();
 
             app.loadGame(game);
 
@@ -73,7 +161,7 @@ describe('Main App tests', () => {
         });
 
         it('app handles onEditFinish even', () => {
-            let app = new MahjongLilHelperMainViewController(appView);
+            let app = getApp();
 
             round.setHand = sinon.fake();
             round.setWinner = sinon.fake();
@@ -100,7 +188,7 @@ describe('Main App tests', () => {
         });
 
         it('app sets winner if was selected', () => {
-            let app = new MahjongLilHelperMainViewController(appView);
+            let app = getApp();
 
             round.setHand = sinon.fake();
             round.setWinner = sinon.fake();
@@ -121,7 +209,7 @@ describe('Main App tests', () => {
         });
 
         it('app adds new round to the game and refresh table', () => {
-            let app = new MahjongLilHelperMainViewController(appView);
+            let app = getApp();
 
             game.createRound = sinon.fake();
 
@@ -205,7 +293,7 @@ describe('Main App tests', () => {
     describe('Switching correct panels on events', () => {
         mochaJsdom();
 
-        let /*Array<Game>*/games, /*MainAppUI*/appView;
+        let /*Array<Game>*/games, /*MainAppUI*/appView, /*MahjongDatabase*/dbMock;
 
         beforeEach(() => {
             games = [
@@ -236,10 +324,15 @@ describe('Main App tests', () => {
                     cancelEvent: new EventEmitter(),
                 }
             };
+
+            dbMock = {
+                load: sinon.fake(() => games),
+                save: sinon.fake(),
+            };
         });
 
         function getApp() {
-            let app = new MahjongLilHelperMainViewController(appView);
+            let app = new MahjongLilHelperMainViewController(appView, dbMock);
 
             app.loadState(games.slice());
 
