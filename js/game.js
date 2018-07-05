@@ -31,6 +31,7 @@ class Round {
         this.winner = null;
         this.lastAvailableTile = false;
         this.lastTileFromWall = false;
+        this.lastTileSpecial = false;
 
         this.hands = [
             {player: players[0], hand: null},
@@ -49,10 +50,11 @@ class Round {
         this.roundScores[player.seatNumber] = this.scoreCalculator.calculateScore(this, player);
     }
 
-    setWinner(player, lastAvailableTile, lastTileFromWall) {
+    setWinner(player, lastAvailableTile, lastTileFromWall, lastTileSpecial) {
         this.winner = player;
         this.lastAvailableTile = lastAvailableTile || false;
         this.lastTileFromWall = lastTileFromWall || false;
+        this.lastTileSpecial = lastTileSpecial || false;
 
         this.players.forEach((player, index) => {
             this.roundScores[index] = this.scoreCalculator.calculateScore(this, player) || 0;

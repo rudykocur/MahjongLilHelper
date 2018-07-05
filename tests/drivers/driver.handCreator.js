@@ -1,5 +1,20 @@
 import {HTMLDriver} from "../utils";
 
+export const SELECTORS = {
+    btnFinishHand: '[data-action="finishHand"]',
+    btnAddPung: '[data-action="addPung"]',
+    btnAddKong: '[data-action="addKong"]',
+    btnAddChow: '[data-action="addChow"]',
+    btnAddPair: '[data-action="addPair"]',
+    btnAddTiles: '[data-action="addTiles"]',
+    checkboxIsWinner: '[name="isWinner"]',
+    checkboxLastTileFromWall: '[name="lastTileFromWall"]',
+    checkboxLastTileSpecial: '[name="lastTileSpecial"]',
+    checkboxLastAvailableTile: '[name="lastAvailableTile"]',
+    radioIsRevealed: '#setRevealed',
+    radioIsConcealed: '#setConcealed',
+};
+
 export class HandCreatorViewDriver extends HTMLDriver{
     constructor(dom) {
         super(dom);
@@ -46,5 +61,21 @@ export class HandCreatorViewDriver extends HTMLDriver{
 
     getRevealedSetsCount() {
         return this.root.querySelectorAll('.handContent .revealedSet').length;
+    }
+
+    getIsWinnerChecked() {
+        return this.root.querySelector(SELECTORS.checkboxIsWinner).checked;
+    }
+
+    getIsLastTileFromWallChecked() {
+        return this.root.querySelector(SELECTORS.checkboxLastTileFromWall).checked;
+    }
+
+    getIsLastTileSpecialChecked() {
+        return this.root.querySelector(SELECTORS.checkboxLastTileSpecial).checked;
+    }
+
+    getIsLastAvailableTileChecked() {
+        return this.root.querySelector(SELECTORS.checkboxLastAvailableTile).checked;
     }
 }

@@ -1,4 +1,4 @@
-import {HandCreatorViewDriver} from "./drivers/driver.handCreator";
+import {HandCreatorViewDriver, SELECTORS} from "./drivers/driver.handCreator";
 
 const mochaJsdom = require('mocha-jsdom');
 import {Hand, Tiles, Pung, Kong, Pair, FreeTiles} from "../js/hand";
@@ -22,21 +22,6 @@ function getHand(event) {
     return hand;
 }
 
-const SELECTORS = {
-    btnFinishHand: '[data-action="finishHand"]',
-    btnAddPung: '[data-action="addPung"]',
-    btnAddKong: '[data-action="addKong"]',
-    btnAddChow: '[data-action="addChow"]',
-    btnAddPair: '[data-action="addPair"]',
-    btnAddTiles: '[data-action="addTiles"]',
-    checkboxIsWinner: '[name="isWinner"]',
-    checkboxLastTileFromWall: '[name="lastTileFromWall"]',
-    checkboxLastTileSpecial: '[name="lastTileSpecial"]',
-    checkboxLastAvailableTile: '[name="lastAvailableTile"]',
-    radioIsRevealed: '#setRevealed',
-    radioIsConcealed: '#setConcealed',
-};
-
 function createGame() {
     return new Game(new Player(0, 'P1'), new Player(1, 'P2'), new Player(2, 'P3'), new Player(3, 'P4'));
 }
@@ -50,13 +35,22 @@ class HandCreatorTemplateMock extends DomTemplate {
 describe('DOM: hand creator tests', () => {
 
     mochaJsdom();
-    let game, round, player, /*HandCreatorViewDriver*/driver;
+    let /*Game*/game, /*Round*/round, player, /*HandCreatorViewDriver*/driver;
 
     function initDefaultView() {
         let view = new HandCreatorView(new HandCreatorTemplateMock(driver.root));
         view.initUI();
         view.showHand(round, player);
 
+        return view;
+    }
+
+    /**
+     * @return {HandCreatorView}
+     */
+    function getView() {
+        let view = new HandCreatorView(new HandCreatorTemplateMock(driver.root));
+        view.initUI();
         return view;
     }
 
@@ -151,7 +145,58 @@ describe('DOM: hand creator tests', () => {
             });
 
             driver.click(SELECTORS.btnFinishHand);
-        })
+        });
+
+        it('loading hand state with round info', () => {
+            let hand = new Hand();
+            hand.addSet(new Pung(true, Tiles.Bamboo5));
+            round.setHand(player, hand);
+            round.setWinner(player, true, true, true);
+
+            let view = getView();
+            view.showHand(round, player);
+
+            expect(driver.getIsWinnerChecked()).to.be.true;
+            expect(driver.getIsLastAvailableTileChecked()).to.be.true;
+            expect(driver.getIsLastTileFromWallChecked()).to.be.true;
+            expect(driver.getIsLastTileSpecialChecked()).to.be.true;
+        });
+
+        it('loading normal hand after winner hand', () => {
+            let hand = new Hand();
+            hand.addSet(new Pung(true, Tiles.Bamboo5));
+            round.setHand(player, hand);
+            round.setWinner(player, true, true);
+
+            let hand2 = new Hand();
+            hand.addSet(new Pung(false, Tiles.Bamboo4));
+            round.setHand(game.players[1], hand2);
+
+            let view = getView();
+            view.showHand(round, player);
+            view.showHand(round, game.players[1]);
+
+            expect(driver.getIsWinnerChecked()).to.be.false;
+            expect(driver.getIsLastAvailableTileChecked()).to.be.false;
+            expect(driver.getIsLastTileFromWallChecked()).to.be.false;
+            expect(driver.getIsLastTileSpecialChecked()).to.be.false;
+        });
+
+        it('loading blank hand after winner hand', () => {
+            let hand = new Hand();
+            hand.addSet(new Pung(true, Tiles.Bamboo5));
+            round.setHand(player, hand);
+            round.setWinner(player, true, true);
+
+            let view = getView();
+            view.showHand(round, player);
+            view.showHand(round, game.players[1]);
+
+            expect(driver.getIsWinnerChecked()).to.be.false;
+            expect(driver.getIsLastAvailableTileChecked()).to.be.false;
+            expect(driver.getIsLastTileFromWallChecked()).to.be.false;
+            expect(driver.getIsLastTileSpecialChecked()).to.be.false;
+        });
     });
 
     describe('Adding tiles', () => {

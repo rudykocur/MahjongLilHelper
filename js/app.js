@@ -100,18 +100,25 @@ export class MahjongLilHelperMainViewController {
 
         this.view.gameList.gameSelectedEvent.addListener(game => {
             this.loadGame(game);
+            this.view.showPanel(this.view.balanceTable);
         });
 
-        this.view.gameList.newGameEvent.addListener(() => this.view.showPanel(this.view.newGameForm));
+        this.view.gameList.newGameEvent.addListener(() => {
+            this.view.showPanel(this.view.newGameForm)
+        });
 
-        this.view.newGameForm.cancelEvent.addListener(() => this.view.showPanel(this.view.gameList));
+        this.view.newGameForm.cancelEvent.addListener(() => {
+            this.view.showPanel(this.view.gameList)
+        });
 
-        this.view.newGameForm.newGameCreateEvent.addListener(players => this.addNewGame(players));
+        this.view.newGameForm.newGameCreateEvent.addListener(players => {
+            this.addNewGame(players);
+            this.view.showPanel(this.view.gameList);
+        });
 
         this.view.balanceTable.onHandEditClick.addListener((/*OnHandEditEvent*/event) => {
-            this.view.showPanel(this.view.handCreator);
-
             this.view.handCreator.showHand(event.round, event.player);
+            this.view.showPanel(this.view.handCreator);
         });
 
         this.view.balanceTable.addRoundEvent.addListener(() => {
@@ -122,11 +129,13 @@ export class MahjongLilHelperMainViewController {
 
         this.view.balanceTable.returnToGameListEvent.addListener(() => {
             this.view.gameList.loadGames(this.games);
-
             this.view.showPanel(this.view.gameList);
         });
 
-        this.view.handCreator.onEditFinish.addListener(this.handleHandEditFinish.bind(this));
+        this.view.handCreator.onEditFinish.addListener(event => {
+            this.handleHandEditFinish(event);
+            this.view.showPanel(this.view.balanceTable);
+        });
     }
 
     loadState(games) {
@@ -137,7 +146,6 @@ export class MahjongLilHelperMainViewController {
     }
 
     loadGame(game) {
-        this.view.showPanel(this.view.balanceTable);
         this.currentGame = game;
         this.view.balanceTable.renderGameBalance(this.currentGame);
     }
@@ -155,8 +163,6 @@ export class MahjongLilHelperMainViewController {
 
         this.save();
 
-        this.view.showPanel(this.view.gameList);
-
         this.view.gameList.loadGames(this.games);
     }
 
@@ -164,8 +170,6 @@ export class MahjongLilHelperMainViewController {
      * @param {OnEditFinishEvent} event
      */
     handleHandEditFinish(event) {
-        this.view.showPanel(this.view.balanceTable);
-
         let hand = new Hand();
         event.tilesets.forEach(set => hand.addSet(set));
 

@@ -131,24 +131,25 @@ var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewControl
 
         this.view.gameList.gameSelectedEvent.addListener(function (game) {
             _this2.loadGame(game);
+            _this2.view.showPanel(_this2.view.balanceTable);
         });
 
         this.view.gameList.newGameEvent.addListener(function () {
-            return _this2.view.showPanel(_this2.view.newGameForm);
+            _this2.view.showPanel(_this2.view.newGameForm);
         });
 
         this.view.newGameForm.cancelEvent.addListener(function () {
-            return _this2.view.showPanel(_this2.view.gameList);
+            _this2.view.showPanel(_this2.view.gameList);
         });
 
         this.view.newGameForm.newGameCreateEvent.addListener(function (players) {
-            return _this2.addNewGame(players);
+            _this2.addNewGame(players);
+            _this2.view.showPanel(_this2.view.gameList);
         });
 
         this.view.balanceTable.onHandEditClick.addListener(function ( /*OnHandEditEvent*/event) {
-            _this2.view.showPanel(_this2.view.handCreator);
-
             _this2.view.handCreator.showHand(event.round, event.player);
+            _this2.view.showPanel(_this2.view.handCreator);
         });
 
         this.view.balanceTable.addRoundEvent.addListener(function () {
@@ -159,11 +160,13 @@ var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewControl
 
         this.view.balanceTable.returnToGameListEvent.addListener(function () {
             _this2.view.gameList.loadGames(_this2.games);
-
             _this2.view.showPanel(_this2.view.gameList);
         });
 
-        this.view.handCreator.onEditFinish.addListener(this.handleHandEditFinish.bind(this));
+        this.view.handCreator.onEditFinish.addListener(function (event) {
+            _this2.handleHandEditFinish(event);
+            _this2.view.showPanel(_this2.view.balanceTable);
+        });
     }
 
     _createClass(MahjongLilHelperMainViewController, [{
@@ -177,7 +180,6 @@ var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewControl
     }, {
         key: 'loadGame',
         value: function loadGame(game) {
-            this.view.showPanel(this.view.balanceTable);
             this.currentGame = game;
             this.view.balanceTable.renderGameBalance(this.currentGame);
         }
@@ -198,8 +200,6 @@ var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewControl
 
             this.save();
 
-            this.view.showPanel(this.view.gameList);
-
             this.view.gameList.loadGames(this.games);
         }
 
@@ -210,8 +210,6 @@ var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewControl
     }, {
         key: 'handleHandEditFinish',
         value: function handleHandEditFinish(event) {
-            this.view.showPanel(this.view.balanceTable);
-
             var hand = new _hand.Hand();
             event.tilesets.forEach(function (set) {
                 return hand.addSet(set);
@@ -541,6 +539,7 @@ var Round = function () {
         this.winner = null;
         this.lastAvailableTile = false;
         this.lastTileFromWall = false;
+        this.lastTileSpecial = false;
 
         this.hands = [{ player: players[0], hand: null }, { player: players[1], hand: null }, { player: players[2], hand: null }, { player: players[3], hand: null }];
 
@@ -557,12 +556,13 @@ var Round = function () {
         }
     }, {
         key: 'setWinner',
-        value: function setWinner(player, lastAvailableTile, lastTileFromWall) {
+        value: function setWinner(player, lastAvailableTile, lastTileFromWall, lastTileSpecial) {
             var _this = this;
 
             this.winner = player;
             this.lastAvailableTile = lastAvailableTile || false;
             this.lastTileFromWall = lastTileFromWall || false;
+            this.lastTileSpecial = lastTileSpecial || false;
 
             this.players.forEach(function (player, index) {
                 _this.roundScores[index] = _this.scoreCalculator.calculateScore(_this, player) || 0;
@@ -1303,7 +1303,7 @@ var ScoreCalculator = function () {
         value: function createDefaultScoreCalculator() {
             var pointsRules = [new BonusTilePoints(), new PointsForPairOfRoundWindRule(), new PointsForPairOfOwnWindRule(), new PointsForPairOfDragonsRule(), new PointsForPungRule(), new PointsForKongRule(), new PointsForMahjong(), new PointsForLastAvailableTile(), new PointsForLastTileFromWall()];
             var multiplierRulesForAll = [new DragonSetMultiplier(), new RoundWindSetMultiplier(), new OwnWindSetMultiplier(), new ThreeConcealedPungsMultiplier(), new ThreeLittleSagesMultiplier(), new ThreeGrandSagesMultiplier(), new FourLittleBlessingsMultiplier(), new FourGrandBlessingsMultiplier()];
-            var multiplierRulesForWinner = [new PureChowsMultiplier(), new NoChowsMultiplier(), new HalfColorMultiplier(), new OnlyHonourTilesMultiplier(), new NoHonourSameSuitTiles()];
+            var multiplierRulesForWinner = [new LastTileSpecialMultiplier(), new PureChowsMultiplier(), new NoChowsMultiplier(), new HalfColorMultiplier(), new OnlyHonourTilesMultiplier(), new NoHonourSameSuitTiles()];
 
             return new ScoreCalculator(pointsRules, multiplierRulesForAll, multiplierRulesForWinner);
         }
@@ -1601,8 +1601,34 @@ var MultiplierRule = function () {
     return MultiplierRule;
 }();
 
-var DragonSetMultiplier = function (_MultiplierRule) {
-    _inherits(DragonSetMultiplier, _MultiplierRule);
+var LastTileSpecialMultiplier = function (_MultiplierRule) {
+    _inherits(LastTileSpecialMultiplier, _MultiplierRule);
+
+    function LastTileSpecialMultiplier() {
+        _classCallCheck(this, LastTileSpecialMultiplier);
+
+        return _possibleConstructorReturn(this, (LastTileSpecialMultiplier.__proto__ || Object.getPrototypeOf(LastTileSpecialMultiplier)).apply(this, arguments));
+    }
+
+    _createClass(LastTileSpecialMultiplier, [{
+        key: "getMultipliers",
+
+        /**
+         * @param hand
+         * @param {Round} round
+         */
+        value: function getMultipliers(hand, round) {
+            if (round.lastTileSpecial) {
+                return 1;
+            }
+        }
+    }]);
+
+    return LastTileSpecialMultiplier;
+}(MultiplierRule);
+
+var DragonSetMultiplier = function (_MultiplierRule2) {
+    _inherits(DragonSetMultiplier, _MultiplierRule2);
 
     function DragonSetMultiplier() {
         _classCallCheck(this, DragonSetMultiplier);
@@ -1620,8 +1646,8 @@ var DragonSetMultiplier = function (_MultiplierRule) {
     return DragonSetMultiplier;
 }(MultiplierRule);
 
-var RoundWindSetMultiplier = function (_MultiplierRule2) {
-    _inherits(RoundWindSetMultiplier, _MultiplierRule2);
+var RoundWindSetMultiplier = function (_MultiplierRule3) {
+    _inherits(RoundWindSetMultiplier, _MultiplierRule3);
 
     function RoundWindSetMultiplier() {
         _classCallCheck(this, RoundWindSetMultiplier);
@@ -1643,8 +1669,8 @@ var RoundWindSetMultiplier = function (_MultiplierRule2) {
     return RoundWindSetMultiplier;
 }(MultiplierRule);
 
-var OwnWindSetMultiplier = function (_MultiplierRule3) {
-    _inherits(OwnWindSetMultiplier, _MultiplierRule3);
+var OwnWindSetMultiplier = function (_MultiplierRule4) {
+    _inherits(OwnWindSetMultiplier, _MultiplierRule4);
 
     function OwnWindSetMultiplier() {
         _classCallCheck(this, OwnWindSetMultiplier);
@@ -1666,8 +1692,8 @@ var OwnWindSetMultiplier = function (_MultiplierRule3) {
     return OwnWindSetMultiplier;
 }(MultiplierRule);
 
-var ThreeConcealedPungsMultiplier = function (_MultiplierRule4) {
-    _inherits(ThreeConcealedPungsMultiplier, _MultiplierRule4);
+var ThreeConcealedPungsMultiplier = function (_MultiplierRule5) {
+    _inherits(ThreeConcealedPungsMultiplier, _MultiplierRule5);
 
     function ThreeConcealedPungsMultiplier() {
         _classCallCheck(this, ThreeConcealedPungsMultiplier);
@@ -1691,8 +1717,8 @@ var ThreeConcealedPungsMultiplier = function (_MultiplierRule4) {
     return ThreeConcealedPungsMultiplier;
 }(MultiplierRule);
 
-var ThreeLittleSagesMultiplier = function (_MultiplierRule5) {
-    _inherits(ThreeLittleSagesMultiplier, _MultiplierRule5);
+var ThreeLittleSagesMultiplier = function (_MultiplierRule6) {
+    _inherits(ThreeLittleSagesMultiplier, _MultiplierRule6);
 
     function ThreeLittleSagesMultiplier() {
         _classCallCheck(this, ThreeLittleSagesMultiplier);
@@ -1715,8 +1741,8 @@ var ThreeLittleSagesMultiplier = function (_MultiplierRule5) {
     return ThreeLittleSagesMultiplier;
 }(MultiplierRule);
 
-var ThreeGrandSagesMultiplier = function (_MultiplierRule6) {
-    _inherits(ThreeGrandSagesMultiplier, _MultiplierRule6);
+var ThreeGrandSagesMultiplier = function (_MultiplierRule7) {
+    _inherits(ThreeGrandSagesMultiplier, _MultiplierRule7);
 
     function ThreeGrandSagesMultiplier() {
         _classCallCheck(this, ThreeGrandSagesMultiplier);
@@ -1738,8 +1764,8 @@ var ThreeGrandSagesMultiplier = function (_MultiplierRule6) {
     return ThreeGrandSagesMultiplier;
 }(MultiplierRule);
 
-var FourLittleBlessingsMultiplier = function (_MultiplierRule7) {
-    _inherits(FourLittleBlessingsMultiplier, _MultiplierRule7);
+var FourLittleBlessingsMultiplier = function (_MultiplierRule8) {
+    _inherits(FourLittleBlessingsMultiplier, _MultiplierRule8);
 
     function FourLittleBlessingsMultiplier() {
         _classCallCheck(this, FourLittleBlessingsMultiplier);
@@ -1762,8 +1788,8 @@ var FourLittleBlessingsMultiplier = function (_MultiplierRule7) {
     return FourLittleBlessingsMultiplier;
 }(MultiplierRule);
 
-var FourGrandBlessingsMultiplier = function (_MultiplierRule8) {
-    _inherits(FourGrandBlessingsMultiplier, _MultiplierRule8);
+var FourGrandBlessingsMultiplier = function (_MultiplierRule9) {
+    _inherits(FourGrandBlessingsMultiplier, _MultiplierRule9);
 
     function FourGrandBlessingsMultiplier() {
         _classCallCheck(this, FourGrandBlessingsMultiplier);
@@ -1785,16 +1811,16 @@ var FourGrandBlessingsMultiplier = function (_MultiplierRule8) {
     return FourGrandBlessingsMultiplier;
 }(MultiplierRule);
 
-var PureChowsMultiplier = function (_MultiplierRule9) {
-    _inherits(PureChowsMultiplier, _MultiplierRule9);
+var PureChowsMultiplier = function (_MultiplierRule10) {
+    _inherits(PureChowsMultiplier, _MultiplierRule10);
 
     function PureChowsMultiplier() {
         _classCallCheck(this, PureChowsMultiplier);
 
-        var _this22 = _possibleConstructorReturn(this, (PureChowsMultiplier.__proto__ || Object.getPrototypeOf(PureChowsMultiplier)).call(this));
+        var _this23 = _possibleConstructorReturn(this, (PureChowsMultiplier.__proto__ || Object.getPrototypeOf(PureChowsMultiplier)).call(this));
 
-        _this22.pointRules = [new PointsForPairOfDragonsRule(), new PointsForPairOfOwnWindRule(), new PointsForPairOfRoundWindRule(), new BonusTilePoints()];
-        return _this22;
+        _this23.pointRules = [new PointsForPairOfDragonsRule(), new PointsForPairOfOwnWindRule(), new PointsForPairOfRoundWindRule(), new BonusTilePoints()];
+        return _this23;
     }
 
     _createClass(PureChowsMultiplier, [{
@@ -1815,8 +1841,8 @@ var PureChowsMultiplier = function (_MultiplierRule9) {
     return PureChowsMultiplier;
 }(MultiplierRule);
 
-var NoChowsMultiplier = function (_MultiplierRule10) {
-    _inherits(NoChowsMultiplier, _MultiplierRule10);
+var NoChowsMultiplier = function (_MultiplierRule11) {
+    _inherits(NoChowsMultiplier, _MultiplierRule11);
 
     function NoChowsMultiplier() {
         _classCallCheck(this, NoChowsMultiplier);
@@ -1840,8 +1866,8 @@ var NoChowsMultiplier = function (_MultiplierRule10) {
     return NoChowsMultiplier;
 }(MultiplierRule);
 
-var HalfColorMultiplier = function (_MultiplierRule11) {
-    _inherits(HalfColorMultiplier, _MultiplierRule11);
+var HalfColorMultiplier = function (_MultiplierRule12) {
+    _inherits(HalfColorMultiplier, _MultiplierRule12);
 
     function HalfColorMultiplier() {
         _classCallCheck(this, HalfColorMultiplier);
@@ -1875,8 +1901,8 @@ var HalfColorMultiplier = function (_MultiplierRule11) {
     return HalfColorMultiplier;
 }(MultiplierRule);
 
-var OnlyHonourTilesMultiplier = function (_MultiplierRule12) {
-    _inherits(OnlyHonourTilesMultiplier, _MultiplierRule12);
+var OnlyHonourTilesMultiplier = function (_MultiplierRule13) {
+    _inherits(OnlyHonourTilesMultiplier, _MultiplierRule13);
 
     function OnlyHonourTilesMultiplier() {
         _classCallCheck(this, OnlyHonourTilesMultiplier);
@@ -2437,10 +2463,23 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
 
             var hand = round.getHand(player).hand;
 
+            this.isWinnerInput.checked = false;
+            this.lastTileFromWallInput.checked = false;
+            this.lastAvailableTileInput.checked = false;
+            this.lastTileSpecialInput.checked = false;
+
             if (hand) {
                 hand.sets.forEach(function (s) {
                     return _this3.renderNewTileset(s);
                 });
+
+                if (round.winner === player) {
+                    this.isWinnerInput.checked = true;
+
+                    this.lastTileFromWallInput.checked = round.lastTileFromWall;
+                    this.lastAvailableTileInput.checked = round.lastAvailableTile;
+                    this.lastTileSpecialInput.checked = round.lastTileSpecial;
+                }
 
                 var score = round.scoreCalculator.calculateExtendedScore(round, player);
 

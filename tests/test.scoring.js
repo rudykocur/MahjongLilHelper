@@ -354,6 +354,15 @@ describe('scoring multipliers', () => {
         scoreHand(round, game.players[0], 960);
     });
 
+    it('last tile special multiplier', () => {
+        hand.addSet(new Chow(false, Tiles.Bamboo1, Tiles.Bamboo2, Tiles.Bamboo3));
+        hand.addSet(new Pung(true, Tiles.Circle2));
+        round.setHand(game.players[0], hand);
+        round.setWinner(game.players[0], false, false, true);
+
+        scoreHand(round, game.players[0], 44);
+    });
+
     it('pure chows mahjong multiplier', () => {
         hand.addSet(new Chow(false, Tiles.Bamboo1, Tiles.Bamboo2, Tiles.Bamboo3));
         hand.addSet(new Chow(false, Tiles.Circle1, Tiles.Circle2, Tiles.Circle3));

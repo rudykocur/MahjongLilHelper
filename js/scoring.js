@@ -112,6 +112,7 @@ class ScoreCalculator {
             new FourGrandBlessingsMultiplier(),
         ];
         let multiplierRulesForWinner = [
+            new LastTileSpecialMultiplier(),
             new PureChowsMultiplier(),
             new NoChowsMultiplier(),
             new HalfColorMultiplier(),
@@ -245,6 +246,18 @@ class PointsForLastTileFromWall extends PointsRule {
 
 class MultiplierRule {
     getMultipliers(hand, round, player) {}
+}
+
+class LastTileSpecialMultiplier extends MultiplierRule {
+    /**
+     * @param hand
+     * @param {Round} round
+     */
+    getMultipliers(hand, round) {
+        if(round.lastTileSpecial) {
+            return 1;
+        }
+    }
 }
 
 class DragonSetMultiplier extends MultiplierRule {

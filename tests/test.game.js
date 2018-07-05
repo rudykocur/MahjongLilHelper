@@ -100,8 +100,6 @@ describe('round balance calculations', function () {
 
         round.setWinner(game.players[0], false, false);
 
-        console.log(round.roundScores);
-
         let balance = round.getRoundBalance();
 
         chai.expect(balance).to.deep.equal([6*416, -416*2+8+8, -416*2-8, -416*2-8])

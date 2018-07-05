@@ -4,6 +4,7 @@ const mocha = require('gulp-mocha');
 const babel = require('gulp-babel');
 
 const path = require('path'),
+    sloc = require('gulp-sloc2'),
     rename = require('gulp-rename'),
     babelify = require('babelify'),
     source = require('vinyl-source-stream'),
@@ -36,7 +37,7 @@ gulp.task('tests', ['babel'], function () {
             require: [
                 'source-map-support/register'
             ],
-            reporter: 'spec',
+            reporter: 'nyan',
         }));
 });
 
@@ -52,6 +53,13 @@ gulp.task('index', () => {
         }
       }))
       .pipe(gulp.dest('./'));
+});
+
+gulp.task('sloc', () => {
+    gulp.src(['js/*.js', 'tests/**.js', 'templates/*.html'])
+        .pipe(sloc({
+            metrics: ['total', 'source', 'comment', 'empty']
+        }));
 });
 
 gulp.task('default', ['index'], () => {

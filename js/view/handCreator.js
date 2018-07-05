@@ -121,8 +121,21 @@ class HandCreatorView extends GamePanel{
 
         let hand = round.getHand(player).hand;
 
+        this.isWinnerInput.checked = false;
+        this.lastTileFromWallInput.checked = false;
+        this.lastAvailableTileInput.checked = false;
+        this.lastTileSpecialInput.checked = false;
+
         if(hand) {
             hand.sets.forEach(s => this.renderNewTileset(s));
+
+            if(round.winner === player) {
+                this.isWinnerInput.checked = true;
+
+                this.lastTileFromWallInput.checked = round.lastTileFromWall;
+                this.lastAvailableTileInput.checked = round.lastAvailableTile;
+                this.lastTileSpecialInput.checked = round.lastTileSpecial;
+            }
 
             let score = round.scoreCalculator.calculateExtendedScore(round, player);
 
