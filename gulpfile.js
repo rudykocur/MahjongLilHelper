@@ -4,6 +4,9 @@ const mocha = require('gulp-mocha');
 const babel = require('gulp-babel');
 
 const path = require('path'),
+    spritesmith = require('gulp.spritesmith'),
+    imageResize = require('gulp-image-resize'),
+    less = require('gulp-less'),
     sloc = require('gulp-sloc2'),
     rename = require('gulp-rename'),
     babelify = require('babelify'),
@@ -18,7 +21,7 @@ gulp.task('babel-src', () => {
         .pipe(sourcemaps.init())
         .pipe(babel())
         .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest('dist/js'))
+        .pipe(gulp.dest('build/js'))
 });
 
 gulp.task('babel-tests', () => {
@@ -26,13 +29,13 @@ gulp.task('babel-tests', () => {
         .pipe(sourcemaps.init())
         .pipe(babel())
         .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest('dist/tests'))
+        .pipe(gulp.dest('build/tests'))
 });
 
 gulp.task('babel', ['babel-src', 'babel-tests']);
 
 gulp.task('tests', ['babel'], function () {
-    return gulp.src(['dist/tests/test.*.js'], {read: false})
+    return gulp.src(['build/tests/test.*.js'], {read: false})
         .pipe(mocha({
             require: [
                 'source-map-support/register'
@@ -53,7 +56,28 @@ gulp.task('index', () => {
               .replace('</body>', '</template>')
         }
       }))
-      .pipe(gulp.dest('./'));
+      .pipe(gulp.dest('./dist'));
+});
+
+gulp.task('less', () => {
+    return gulp.src('./*.less')
+        .pipe(sourcemaps.init())
+        .pipe(less())
+        .pipe(sourcemaps.write('./'))
+        .pipe(gulp.dest('./dist'));
+});
+
+gulp.task('tiles-resize', () => {
+    return gulp.src('tiles/*.png')
+        .pipe(imageResize({width: '45'}))
+        .pipe(gulp.dest('./build/tiles'));
+});
+
+gulp.task('css-sprites', ['tiles-resize'], () => {
+    return gulp.src('./build/tiles/*.png').pipe(spritesmith({
+    imgName: 'sprite.png',
+    cssName: 'sprite.css'
+  })).pipe(gulp.dest('./dist'))
 });
 
 gulp.task('sloc', () => {
@@ -63,7 +87,7 @@ gulp.task('sloc', () => {
         }));
 });
 
-gulp.task('default', ['index'], () => {
+gulp.task('default', ['index', 'less', 'css-sprites'], () => {
     return browserify({
         entries: ['./js/init.js'],
         debug: true})
@@ -77,5 +101,5 @@ gulp.task('default', ['index'], () => {
         .pipe(sourcemaps.init({loadMaps: true}))
         // .pipe(uglify())
         .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest('./'));
+        .pipe(gulp.dest('./dist'));
 });

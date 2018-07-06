@@ -1,0 +1,282 @@
+/*
+Icon classes can be used entirely standalone. They are named after their original file names.
+
+Example usage in HTML:
+
+`display: block` sprite:
+<div class="icon-home"></div>
+
+To change `display` (e.g. `display: inline-block;`), we suggest using a common CSS class:
+
+// CSS
+.icon {
+  display: inline-block;
+}
+
+// HTML
+<i class="icon icon-home"></i>
+*/
+.icon-bonus-autumn {
+  background-image: url(sprite.png);
+  background-position: -315px 0px;
+  width: 45px;
+  height: 65px;
+}
+.icon-bonus-flower1 {
+  background-image: url(sprite.png);
+  background-position: -180px -197px;
+  width: 45px;
+  height: 65px;
+}
+.icon-bonus-flower2 {
+  background-image: url(sprite.png);
+  background-position: -135px -65px;
+  width: 45px;
+  height: 65px;
+}
+.icon-bonus-flower3 {
+  background-image: url(sprite.png);
+  background-position: -45px -197px;
+  width: 45px;
+  height: 65px;
+}
+.icon-bonus-flower4 {
+  background-image: url(sprite.png);
+  background-position: 0px 0px;
+  width: 45px;
+  height: 66px;
+}
+.icon-bonus-spring {
+  background-image: url(sprite.png);
+  background-position: -225px -262px;
+  width: 45px;
+  height: 65px;
+}
+.icon-bonus-summer {
+  background-image: url(sprite.png);
+  background-position: -360px -130px;
+  width: 45px;
+  height: 65px;
+}
+.icon-bonus-winter {
+  background-image: url(sprite.png);
+  background-position: -45px 0px;
+  width: 45px;
+  height: 66px;
+}
+.icon-dragon-green {
+  background-image: url(sprite.png);
+  background-position: -180px 0px;
+  width: 45px;
+  height: 65px;
+}
+.icon-dragon-red {
+  background-image: url(sprite.png);
+  background-position: -180px -65px;
+  width: 45px;
+  height: 65px;
+}
+.icon-dragon-white {
+  background-image: url(sprite.png);
+  background-position: 0px -132px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-bamboo-1 {
+  background-image: url(sprite.png);
+  background-position: -45px -132px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-bamboo-2 {
+  background-image: url(sprite.png);
+  background-position: -90px -132px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-bamboo-3 {
+  background-image: url(sprite.png);
+  background-position: -135px -132px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-bamboo-4 {
+  background-image: url(sprite.png);
+  background-position: -180px -132px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-bamboo-5 {
+  background-image: url(sprite.png);
+  background-position: -225px 0px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-bamboo-6 {
+  background-image: url(sprite.png);
+  background-position: -225px -65px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-bamboo-7 {
+  background-image: url(sprite.png);
+  background-position: -225px -130px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-bamboo-8 {
+  background-image: url(sprite.png);
+  background-position: 0px -197px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-bamboo-9 {
+  background-image: url(sprite.png);
+  background-position: -90px 0px;
+  width: 45px;
+  height: 66px;
+}
+.icon-suit-character-1 {
+  background-image: url(sprite.png);
+  background-position: -90px -197px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-character-2 {
+  background-image: url(sprite.png);
+  background-position: -135px -197px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-character-3 {
+  background-image: url(sprite.png);
+  background-position: -135px 0px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-character-4 {
+  background-image: url(sprite.png);
+  background-position: -225px -197px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-character-5 {
+  background-image: url(sprite.png);
+  background-position: -270px 0px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-character-6 {
+  background-image: url(sprite.png);
+  background-position: -270px -65px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-character-7 {
+  background-image: url(sprite.png);
+  background-position: -270px -130px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-character-8 {
+  background-image: url(sprite.png);
+  background-position: -270px -195px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-character-9 {
+  background-image: url(sprite.png);
+  background-position: 0px -66px;
+  width: 45px;
+  height: 66px;
+}
+.icon-suit-circle-1 {
+  background-image: url(sprite.png);
+  background-position: -315px -65px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-circle-2 {
+  background-image: url(sprite.png);
+  background-position: -315px -130px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-circle-3 {
+  background-image: url(sprite.png);
+  background-position: -315px -195px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-circle-4 {
+  background-image: url(sprite.png);
+  background-position: 0px -262px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-circle-5 {
+  background-image: url(sprite.png);
+  background-position: -45px -262px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-circle-6 {
+  background-image: url(sprite.png);
+  background-position: -90px -262px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-circle-7 {
+  background-image: url(sprite.png);
+  background-position: -135px -262px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-circle-8 {
+  background-image: url(sprite.png);
+  background-position: -180px -262px;
+  width: 45px;
+  height: 65px;
+}
+.icon-suit-circle-9 {
+  background-image: url(sprite.png);
+  background-position: -45px -66px;
+  width: 45px;
+  height: 66px;
+}
+.icon-tile036 {
+  background-image: url(sprite.png);
+  background-position: -270px -262px;
+  width: 45px;
+  height: 65px;
+}
+.icon-tile038 {
+  background-image: url(sprite.png);
+  background-position: -315px -262px;
+  width: 45px;
+  height: 65px;
+}
+.icon-wind-east {
+  background-image: url(sprite.png);
+  background-position: -360px 0px;
+  width: 45px;
+  height: 65px;
+}
+.icon-wind-north {
+  background-image: url(sprite.png);
+  background-position: -360px -65px;
+  width: 45px;
+  height: 65px;
+}
+.icon-wind-south {
+  background-image: url(sprite.png);
+  background-position: -90px -66px;
+  width: 45px;
+  height: 66px;
+}
+.icon-wind-west {
+  background-image: url(sprite.png);
+  background-position: -360px -195px;
+  width: 45px;
+  height: 65px;
+}

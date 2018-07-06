@@ -1,0 +1,91 @@
+table td,
+table th {
+  padding: 2px 4px;
+}
+table thead td {
+  text-align: right;
+}
+table tbody tr:nth-child(2n - 1) td:nth-child(n+1):nth-child(-n+2),
+table tbody tr:nth-child(2n) td {
+  border-bottom: solid 3px black;
+}
+table tbody tr:nth-child(2n - 1) td:nth-child(n+3):hover {
+  cursor: pointer;
+  background: #ffffdc;
+}
+table tbody .winner {
+  background: #bff8ad;
+}
+table [data-action="addRound"] {
+  text-align: center;
+}
+table [data-action="addRound"]:hover {
+  cursor: pointer;
+  background: #ffffdc;
+}
+table tr:nth-child(2n) td {
+  background-color: #e6e6e6;
+}
+#handCreator .suitGroups li,
+#handCreator .handContent li {
+  display: inline-block;
+  margin: 0 3px;
+}
+#handCreator .suitGroups li {
+  border: solid 1px gray;
+}
+#handCreator .suitGroups ul {
+  margin: 2px;
+  padding: 0;
+}
+#handCreator .suitGroups ul li.selected {
+  background: #bff8ad;
+}
+#handCreator .handContent ul {
+  display: inline-block;
+  padding: 0 3px;
+  border: solid 1px gray;
+  margin: 3px;
+  float: left;
+  clear: left;
+  position: relative;
+  padding-right: 20px;
+}
+#handCreator .revealedSet {
+  background: #ececec;
+}
+#handCreator .revealedSet li:nth-child(2) {
+  transform: rotate(90deg);
+}
+#handCreator .handContent .actionDelete {
+  position: absolute;
+  cursor: pointer;
+  padding: 3px;
+  right: 3px;
+}
+#handCreator .handContent .actionDelete:hover {
+  background: #ffffdc;
+}
+#handCreator .finishHandSection label {
+  display: block;
+}
+.tile-icon {
+  display: inline-block;
+}
+img.tile {
+  width: 3rem;
+  display: block;
+  padding: 3px;
+}
+.gamePanel.hidden {
+  display: none;
+}
+.gamesList li {
+  list-style: none;
+  cursor: pointer;
+}
+.gamesList li:hover {
+  background: #ffffdc;
+}
+
+/*# sourceMappingURL=styles.css.map */

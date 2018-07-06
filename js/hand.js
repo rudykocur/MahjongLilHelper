@@ -49,7 +49,7 @@ class Tile {
     }
 
     toTypeString() {
-        `[Tile ${this}]`;
+        return `[Tile ${this}]`;
     }
 }
 

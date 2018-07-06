@@ -784,7 +784,7 @@ var Tile = function () {
     }, {
         key: 'toTypeString',
         value: function toTypeString() {
-            '[Tile ' + this + ']';
+            return '[Tile ' + this + ']';
         }
     }]);
 
@@ -2913,19 +2913,20 @@ var DomTemplate = exports.DomTemplate = function (_TemplateContainer) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+    value: true
 });
 exports.renderTile = renderTile;
 /**
  *
  * @param {Tile} tile
- * @return {HTMLImageElement}
+ * @return {HTMLElement}
  */
 function renderTile(tile) {
-  var img = document.createElement('img');
-  img.classList.add('tile');
-  img.src = 'tiles/' + tile.toTypeString() + '.png';
-  return img;
+    var elem = document.createElement('i');
+    elem.classList.add('tile-icon');
+    elem.classList.add('icon-' + tile.toTypeString());
+    elem.setAttribute('data-tile', tile.toTypeString());
+    return elem;
 }
 
 },{}],15:[function(require,module,exports){

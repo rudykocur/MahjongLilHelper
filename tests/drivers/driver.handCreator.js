@@ -23,7 +23,7 @@ export class HandCreatorViewDriver extends HTMLDriver{
     }
 
     clickTile(tile) {
-        this.click(`img[src*="${tile.toTypeString()}"]`, 'click');
+        this.click(`.icon-${tile.toTypeString()}`, 'click');
     }
 
     setIsRevealed(isRevealed) {
@@ -56,7 +56,7 @@ export class HandCreatorViewDriver extends HTMLDriver{
     getTilesCountInSet(setIndex) {
         let sets = this._getAddedSets();
 
-        return sets[setIndex].querySelectorAll('img').length;
+        return sets[setIndex].querySelectorAll('.tile-icon').length;
     }
 
     getRevealedSetsCount() {

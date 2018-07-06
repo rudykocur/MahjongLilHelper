@@ -89,9 +89,9 @@ export class GameBalanceViewDriver extends HTMLDriver {
 
     getRoundWindTypeString(round) {
         let roundRow = this._getRoundRow(round);
-        let windIndicator = roundRow.querySelector('img');
+        let windIndicator = roundRow.querySelector('.tile-icon');
 
-        return path.basename(windIndicator.src, '.png');
+        return windIndicator.dataset.tile;
     }
 
     clickAddRoundButton() {

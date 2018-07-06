@@ -1,11 +1,12 @@
 /**
  *
  * @param {Tile} tile
- * @return {HTMLImageElement}
+ * @return {HTMLElement}
  */
 export function renderTile(tile) {
-    let img = document.createElement('img');
-    img.classList.add('tile');
-    img.src = 'tiles/' + tile.toTypeString() + '.png';
-    return img;
+    let elem = document.createElement('i');
+    elem.classList.add('tile-icon');
+    elem.classList.add('icon-'+tile.toTypeString());
+    elem.setAttribute('data-tile', tile.toTypeString());
+    return elem;
 }
