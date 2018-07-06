@@ -37,6 +37,7 @@ gulp.task('tests', ['babel'], function () {
             require: [
                 'source-map-support/register'
             ],
+            // grep: '',
             reporter: 'nyan',
         }));
 });

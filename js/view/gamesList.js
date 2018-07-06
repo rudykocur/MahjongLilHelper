@@ -13,10 +13,10 @@ export class GamesListView extends GamePanel{
     constructor(template) {
         super(template.getRoot());
 
+        this.template = template;
+
         this.gameSelectedEvent = new EventEmitter();
         this.newGameEvent = new EventEmitter();
-
-        this.gamesList = this.root.querySelector('ul');
 
         this.root.querySelector('button').addEventListener('click', () => {
             this.newGameEvent.emit();
@@ -28,19 +28,30 @@ export class GamesListView extends GamePanel{
      * @param {Array<Game>} gamesList
      */
     loadGames(gamesList) {
-        while(this.gamesList.firstChild) {
-            this.gamesList.removeChild(this.gamesList.firstChild);
-        }
+        this.template.clearSlot('games');
 
         gamesList.forEach(game => {
-            let row = document.createElement('li');
-            row.textContent = this._getGameLabel(game);
 
-            row.addEventListener('click', () => {
-                this.gameSelectedEvent.emit(game);
+            let balance = game.getTotalBalance();
+
+            let gameRow = this.template.create('gameRow');
+            gameRow.fillSlots({
+                roundNumber: game.rounds.length,
+                player1Name: game.players[0].name,
+                player2Name: game.players[1].name,
+                player3Name: game.players[2].name,
+                player4Name: game.players[3].name,
+                player1Score: balance[0],
+                player2Score: balance[1],
+                player3Score: balance[2],
+                player4Score: balance[3],
             });
 
-            this.gamesList.appendChild(row);
+            this.template.appendToSlot('games', gameRow);
+
+            gameRow.getRoot().addEventListener('click', () => {
+                this.gameSelectedEvent.emit(game);
+            })
         })
     }
 

@@ -22,8 +22,6 @@ export class GameBalanceTableView extends GamePanel{
         this.addRoundEvent = new EventEmitter();
         this.returnToGameListEvent = new EventEmitter();
 
-        this._createdRows = [];
-
         this.root.querySelector('[data-action="addRound"]').addEventListener('click', () => {
             this.addRoundEvent.emit();
         });
@@ -45,54 +43,40 @@ export class GameBalanceTableView extends GamePanel{
             player4Name: game.players[3].name,
         });
 
-        this._createdRows.forEach(row => row.parentNode.removeChild(row));
-        this._createdRows = [];
+        this.template.clearSlot('rows');
 
         game.rounds.forEach(round => {
             let balance = round.getRoundBalance();
             let cumulativeBalance = game.getTotalBalance(round.roundIndex);
 
-            let row = this.table.insertRow();
-            let row2 = this.table.insertRow();
-            this.tbody.appendChild(row);
-            this.tbody.appendChild(row2);
+            let row = this.template.create('row');
+            this.template.appendToSlot('rows', row);
 
-            this._createdRows.push(row);
-            this._createdRows.push(row2);
+            row.fillSlots({
+                player1RoundBalance: balance[0],
+                player2RoundBalance: balance[1],
+                player3RoundBalance: balance[2],
+                player4RoundBalance: balance[3],
+                player1CumulativeBalance: cumulativeBalance[0],
+                player2CumulativeBalance: cumulativeBalance[1],
+                player3CumulativeBalance: cumulativeBalance[2],
+                player4CumulativeBalance: cumulativeBalance[3],
+                roundNumber: round.roundNumber,
+                windIndicator: renderTile(round.windIndicator)
+            });
 
-            let roundCell = row.insertCell();
-            let windCell = row.insertCell();
-
-            roundCell.rowSpan = 2;
-            windCell.rowSpan = 2;
-
-            roundCell.appendChild(document.createTextNode(round.roundNumber));
-            windCell.appendChild(renderTile(round.windIndicator));
-
-            let roundCells = this._renderBalance(row, balance);
-            this._renderBalance(row2, cumulativeBalance);
-
-            roundCells.forEach((cell, index) => {
-
-                if(round.winner && round.winner.seatNumber === index) {
-                    cell.classList.add('winner');
+            Array.from(row.getRoot().querySelectorAll('[data-action="handEdit"]')).forEach((elem, playerIndex) => {
+                if(round.winner && round.winner.seatNumber === playerIndex) {
+                    elem.classList.add('winner');
                 }
 
-                cell.addEventListener('click', () => {
+                elem.addEventListener('click', () => {
                     this.onHandEditClick.emit({
-                        round: round,
-                        player: game.players[index],
-                    });
-                })
+                            round: round,
+                            player: game.players[playerIndex],
+                        });
+                });
             })
-        });
-    }
-
-    _renderBalance(row, balance) {
-        return balance.map(bal => {
-            let cell = row.insertCell();
-            cell.appendChild(document.createTextNode(bal));
-            return cell;
         });
     }
 }

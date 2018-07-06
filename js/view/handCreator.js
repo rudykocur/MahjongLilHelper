@@ -24,11 +24,13 @@ class HandCreatorView extends GamePanel{
         this.handContents = this.root.querySelector('.handContent');
         this.handScoreRules = this.root.querySelector('.handScoreRules');
 
-        this.handRevealedInput = this.root.elements['revealed'];
-        this.isWinnerInput = this.root.elements['isWinner'];
-        this.lastTileFromWallInput = this.root.elements['lastTileFromWall'];
-        this.lastAvailableTileInput = this.root.elements['lastAvailableTile'];
-        this.lastTileSpecialInput = this.root.elements['lastTileSpecial'];
+        this.form = this.root.querySelector('form');
+
+        this.handRevealedInput = this.form.elements['revealed'];
+        this.isWinnerInput = this.form.elements['isWinner'];
+        this.lastTileFromWallInput = this.form.elements['lastTileFromWall'];
+        this.lastAvailableTileInput = this.form.elements['lastAvailableTile'];
+        this.lastTileSpecialInput = this.form.elements['lastTileSpecial'];
 
         this.playerNameSlot = this.root.querySelector('[data-slot="playerName"]');
         this.roundNumberSlot = this.root.querySelector('[data-slot="roundNumber"]');

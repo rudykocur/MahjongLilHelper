@@ -28,7 +28,7 @@ function createGame() {
 
 class HandCreatorTemplateMock extends DomTemplate {
     constructor(root) {
-        super(root.querySelector('form'));
+        super(root);
     }
 }
 

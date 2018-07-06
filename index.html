@@ -33,7 +33,7 @@
                 <th data-slot="player4Name">Ola</th>
             </tr>
         </thead>
-        <tbody></tbody>
+        <tbody data-slot="rows"></tbody>
         <tfoot>
             <tr>
                 <td>&nbsp;</td>
@@ -41,18 +41,50 @@
             </tr>
         </tfoot>
     </table>
+
+    <template data-name="row">
+        <tr>
+            <td rowspan="2" data-slot="roundNumber"></td>
+            <td rowspan="2" data-slot="windIndicator"></td>
+            <td data-slot="player1RoundBalance" data-action="handEdit"></td>
+            <td data-slot="player2RoundBalance" data-action="handEdit"></td>
+            <td data-slot="player3RoundBalance" data-action="handEdit"></td>
+            <td data-slot="player4RoundBalance" data-action="handEdit"></td>
+        </tr>
+        <tr>
+            <td data-slot="player1CumulativeBalance"></td>
+            <td data-slot="player2CumulativeBalance"></td>
+            <td data-slot="player3CumulativeBalance"></td>
+            <td data-slot="player4CumulativeBalance"></td>
+        </tr>
+    </template>
+
+    <template data-name="winner">
+        <strong data-slot="roundBalance"></strong>
+    </template>
 </div>
 </template>
     <template data-name="gamesList">
     <div>
         <h1>Mahjong Games List</h1>
         <button class="button">Utwórz nową grę</button>
-        <ul class="gamesList"></ul>
+        <ul class="gamesList" data-slot="games"></ul>
     </div>
+
+    <template data-name="gameRow">
+        <li>
+            Runda <span data-slot="roundNumber"></span>:
+                <span data-slot="player1Name"></span> (<span data-slot="player1Score"></span>),
+                <span data-slot="player2Name"></span> (<span data-slot="player2Score"></span>),
+                <span data-slot="player3Name"></span> (<span data-slot="player3Score"></span>),
+                <span data-slot="player4Name"></span> (<span data-slot="player4Score"></span>)
+        </li>
+    </template>
 </template>
     <template data-name="hand">
+<div>
 <form id="handCreator">
-    <h2>Składanie ręki: <span data-slot="playerName"></span>, runda <span data-slot="roundNumber"></span></h2>
+    <h2>Składanie ręki: <span data-slot="playerName">GRACZ</span>, runda <span data-slot="roundNumber">##</span></h2>
     <div class="suitGroups"></div>
     <div>
         <fieldset>
@@ -84,6 +116,7 @@
         <button class="button small" data-action="finishHand">Zakończ tworzenie ręki</button>
     </div>
 </form>
+    </div>
 </template>
     <template data-name="newGameForm">
 <div>

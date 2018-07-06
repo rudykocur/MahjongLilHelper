@@ -2081,8 +2081,6 @@ var GameBalanceTableView = exports.GameBalanceTableView = (_dec = (0, _needlepoi
         _this.addRoundEvent = new _utils.EventEmitter();
         _this.returnToGameListEvent = new _utils.EventEmitter();
 
-        _this._createdRows = [];
-
         _this.root.querySelector('[data-action="addRound"]').addEventListener('click', function () {
             _this.addRoundEvent.emit();
         });
@@ -2111,57 +2109,40 @@ var GameBalanceTableView = exports.GameBalanceTableView = (_dec = (0, _needlepoi
                 player4Name: game.players[3].name
             });
 
-            this._createdRows.forEach(function (row) {
-                return row.parentNode.removeChild(row);
-            });
-            this._createdRows = [];
+            this.template.clearSlot('rows');
 
             game.rounds.forEach(function (round) {
                 var balance = round.getRoundBalance();
                 var cumulativeBalance = game.getTotalBalance(round.roundIndex);
 
-                var row = _this2.table.insertRow();
-                var row2 = _this2.table.insertRow();
-                _this2.tbody.appendChild(row);
-                _this2.tbody.appendChild(row2);
+                var row = _this2.template.create('row');
+                _this2.template.appendToSlot('rows', row);
 
-                _this2._createdRows.push(row);
-                _this2._createdRows.push(row2);
+                row.fillSlots({
+                    player1RoundBalance: balance[0],
+                    player2RoundBalance: balance[1],
+                    player3RoundBalance: balance[2],
+                    player4RoundBalance: balance[3],
+                    player1CumulativeBalance: cumulativeBalance[0],
+                    player2CumulativeBalance: cumulativeBalance[1],
+                    player3CumulativeBalance: cumulativeBalance[2],
+                    player4CumulativeBalance: cumulativeBalance[3],
+                    roundNumber: round.roundNumber,
+                    windIndicator: (0, _utils2.renderTile)(round.windIndicator)
+                });
 
-                var roundCell = row.insertCell();
-                var windCell = row.insertCell();
-
-                roundCell.rowSpan = 2;
-                windCell.rowSpan = 2;
-
-                roundCell.appendChild(document.createTextNode(round.roundNumber));
-                windCell.appendChild((0, _utils2.renderTile)(round.windIndicator));
-
-                var roundCells = _this2._renderBalance(row, balance);
-                _this2._renderBalance(row2, cumulativeBalance);
-
-                roundCells.forEach(function (cell, index) {
-
-                    if (round.winner && round.winner.seatNumber === index) {
-                        cell.classList.add('winner');
+                Array.from(row.getRoot().querySelectorAll('[data-action="handEdit"]')).forEach(function (elem, playerIndex) {
+                    if (round.winner && round.winner.seatNumber === playerIndex) {
+                        elem.classList.add('winner');
                     }
 
-                    cell.addEventListener('click', function () {
+                    elem.addEventListener('click', function () {
                         _this2.onHandEditClick.emit({
                             round: round,
-                            player: game.players[index]
+                            player: game.players[playerIndex]
                         });
                     });
                 });
-            });
-        }
-    }, {
-        key: "_renderBalance",
-        value: function _renderBalance(row, balance) {
-            return balance.map(function (bal) {
-                var cell = row.insertCell();
-                cell.appendChild(document.createTextNode(bal));
-                return cell;
             });
         }
     }]);
@@ -2246,10 +2227,10 @@ var GamesListView = exports.GamesListView = (_dec = (0, _needlepoint.dependencie
 
         var _this = _possibleConstructorReturn(this, (GamesListView.__proto__ || Object.getPrototypeOf(GamesListView)).call(this, template.getRoot()));
 
+        _this.template = template;
+
         _this.gameSelectedEvent = new _utils.EventEmitter();
         _this.newGameEvent = new _utils.EventEmitter();
-
-        _this.gamesList = _this.root.querySelector('ul');
 
         _this.root.querySelector('button').addEventListener('click', function () {
             _this.newGameEvent.emit();
@@ -2268,19 +2249,30 @@ var GamesListView = exports.GamesListView = (_dec = (0, _needlepoint.dependencie
         value: function loadGames(gamesList) {
             var _this2 = this;
 
-            while (this.gamesList.firstChild) {
-                this.gamesList.removeChild(this.gamesList.firstChild);
-            }
+            this.template.clearSlot('games');
 
             gamesList.forEach(function (game) {
-                var row = document.createElement('li');
-                row.textContent = _this2._getGameLabel(game);
 
-                row.addEventListener('click', function () {
-                    _this2.gameSelectedEvent.emit(game);
+                var balance = game.getTotalBalance();
+
+                var gameRow = _this2.template.create('gameRow');
+                gameRow.fillSlots({
+                    roundNumber: game.rounds.length,
+                    player1Name: game.players[0].name,
+                    player2Name: game.players[1].name,
+                    player3Name: game.players[2].name,
+                    player4Name: game.players[3].name,
+                    player1Score: balance[0],
+                    player2Score: balance[1],
+                    player3Score: balance[2],
+                    player4Score: balance[3]
                 });
 
-                _this2.gamesList.appendChild(row);
+                _this2.template.appendToSlot('games', gameRow);
+
+                gameRow.getRoot().addEventListener('click', function () {
+                    _this2.gameSelectedEvent.emit(game);
+                });
             });
         }
 
@@ -2352,11 +2344,13 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
         _this.handContents = _this.root.querySelector('.handContent');
         _this.handScoreRules = _this.root.querySelector('.handScoreRules');
 
-        _this.handRevealedInput = _this.root.elements['revealed'];
-        _this.isWinnerInput = _this.root.elements['isWinner'];
-        _this.lastTileFromWallInput = _this.root.elements['lastTileFromWall'];
-        _this.lastAvailableTileInput = _this.root.elements['lastAvailableTile'];
-        _this.lastTileSpecialInput = _this.root.elements['lastTileSpecial'];
+        _this.form = _this.root.querySelector('form');
+
+        _this.handRevealedInput = _this.form.elements['revealed'];
+        _this.isWinnerInput = _this.form.elements['isWinner'];
+        _this.lastTileFromWallInput = _this.form.elements['lastTileFromWall'];
+        _this.lastAvailableTileInput = _this.form.elements['lastAvailableTile'];
+        _this.lastTileSpecialInput = _this.form.elements['lastTileSpecial'];
 
         _this.playerNameSlot = _this.root.querySelector('[data-slot="playerName"]');
         _this.roundNumberSlot = _this.root.querySelector('[data-slot="roundNumber"]');
@@ -2751,12 +2745,16 @@ exports.domLoader = domLoader;
 
 var _needlepoint = require('needlepoint');
 
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function domLoader(name) {
     return function () {
         var tmpl = _needlepoint.container.resolve(TemplateContainer);
-        return new DomTemplate(tmpl.create(name));
+        return tmpl.create(name);
     };
 }
 
@@ -2768,7 +2766,7 @@ var TemplateContainer = exports.TemplateContainer = (0, _needlepoint.singleton)(
     }
 
     /**
-     * @return {HTMLElement}
+     * @return {DomTemplate}
      */
 
 
@@ -2776,7 +2774,7 @@ var TemplateContainer = exports.TemplateContainer = (0, _needlepoint.singleton)(
         key: 'create',
         value: function create(name) {
             var tmpl = this._templates[name];
-            return document.importNode(tmpl.content, true).firstElementChild;
+            return new DomTemplate(document.importNode(tmpl.content, true));
         }
 
         /**
@@ -2808,7 +2806,9 @@ var TemplateContainer = exports.TemplateContainer = (0, _needlepoint.singleton)(
  * @property {String} name
  */
 
-var DomTemplate = exports.DomTemplate = function () {
+var DomTemplate = exports.DomTemplate = function (_TemplateContainer) {
+    _inherits(DomTemplate, _TemplateContainer);
+
     /**
      *
      * @param {HTMLElement} template
@@ -2816,12 +2816,18 @@ var DomTemplate = exports.DomTemplate = function () {
     function DomTemplate(template) {
         _classCallCheck(this, DomTemplate);
 
-        this.template = template;
+        var _this2 = _possibleConstructorReturn(this, (DomTemplate.__proto__ || Object.getPrototypeOf(DomTemplate)).call(this));
+
+        _this2.template = template;
+        _this2.root = _this2.template.firstElementChild;
 
         /**
          * @type {Array<TemplateSlot>}
          */
-        this._slots = this._findSlots(template);
+        _this2._slots = _this2._findSlots(template);
+
+        _this2.discover(template);
+        return _this2;
     }
 
     _createClass(DomTemplate, [{
@@ -2835,11 +2841,56 @@ var DomTemplate = exports.DomTemplate = function () {
             });
         }
     }, {
+        key: '_valueToNode',
+        value: function _valueToNode(val) {
+            if (val instanceof DomTemplate) {
+                return val.template;
+            } else if (typeof val === "string" || typeof val === "number") {
+                return document.createTextNode('' + val);
+            }
+            return val;
+        }
+    }, {
         key: 'fillSlots',
         value: function fillSlots(slotValues) {
+            var _this3 = this;
+
             this._slots.forEach(function (slot) {
                 if (slot.name in slotValues) {
-                    slot.node.textContent = slotValues[slot.name];
+                    slot.node.textContent = '';
+                    slot.node.appendChild(_this3._valueToNode(slotValues[slot.name]));
+                }
+            });
+        }
+    }, {
+        key: 'fillSlot',
+        value: function fillSlot(name, val) {
+            var _this4 = this;
+
+            this._slots.forEach(function (slot) {
+                if (slot.name === name) {
+                    slot.node.textContent = '';
+                    slot.node.appendChild(_this4._valueToNode(val));
+                }
+            });
+        }
+    }, {
+        key: 'clearSlot',
+        value: function clearSlot(name) {
+            this._slots.forEach(function (slot) {
+                if (slot.name === name) {
+                    slot.node.textContent = '';
+                }
+            });
+        }
+    }, {
+        key: 'appendToSlot',
+        value: function appendToSlot(name, value) {
+            var _this5 = this;
+
+            this._slots.forEach(function (slot) {
+                if (slot.name === name) {
+                    slot.node.appendChild(_this5._valueToNode(value));
                 }
             });
         }
@@ -2851,12 +2902,12 @@ var DomTemplate = exports.DomTemplate = function () {
     }, {
         key: 'getRoot',
         value: function getRoot() {
-            return this.template;
+            return this.root;
         }
     }]);
 
     return DomTemplate;
-}();
+}(TemplateContainer);
 
 },{"needlepoint":17}],14:[function(require,module,exports){
 'use strict';

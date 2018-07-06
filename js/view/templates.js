@@ -3,7 +3,7 @@ import {dependencies, singleton, container} from 'needlepoint';
 export function domLoader(name) {
     return function() {
         let tmpl = container.resolve(TemplateContainer);
-        return new DomTemplate(tmpl.create(name));
+        return tmpl.create(name);
     }
 }
 
@@ -14,11 +14,11 @@ export class TemplateContainer {
     }
 
     /**
-     * @return {HTMLElement}
+     * @return {DomTemplate}
      */
     create(name) {
         let tmpl = this._templates[name];
-        return document.importNode(tmpl.content, true).firstElementChild;
+        return new DomTemplate(document.importNode(tmpl.content, true));
     }
 
     /**
@@ -42,18 +42,23 @@ export class TemplateContainer {
  */
 
 
-export class DomTemplate {
+export class DomTemplate extends TemplateContainer {
     /**
      *
      * @param {HTMLElement} template
      */
     constructor(template) {
+        super();
+
         this.template = template;
+        this.root = this.template.firstElementChild;
 
         /**
          * @type {Array<TemplateSlot>}
          */
         this._slots = this._findSlots(template);
+
+        this.discover(template);
     }
 
     _findSlots(element) {
@@ -65,10 +70,46 @@ export class DomTemplate {
         })
     }
 
+    _valueToNode(val) {
+        if(val instanceof DomTemplate) {
+            return val.template;
+        }
+        else if(typeof val === "string" || typeof val === "number") {
+            return document.createTextNode(''+val);
+        }
+        return val;
+    }
+
     fillSlots(slotValues) {
         this._slots.forEach(slot => {
             if(slot.name in slotValues) {
-                slot.node.textContent = slotValues[slot.name];
+                slot.node.textContent = '';
+                slot.node.appendChild(this._valueToNode(slotValues[slot.name]));
+            }
+        })
+    }
+
+    fillSlot(name, val) {
+        this._slots.forEach(slot => {
+            if (slot.name === name) {
+                slot.node.textContent = '';
+                slot.node.appendChild(this._valueToNode(val));
+            }
+        })
+    }
+
+    clearSlot(name) {
+        this._slots.forEach(slot => {
+            if (slot.name === name) {
+                slot.node.textContent = '';
+            }
+        });
+    }
+
+    appendToSlot(name, value) {
+        this._slots.forEach(slot => {
+            if (slot.name === name) {
+                slot.node.appendChild(this._valueToNode(value));
             }
         })
     }
@@ -77,6 +118,6 @@ export class DomTemplate {
      * @return {HTMLElement}
      */
     getRoot() {
-        return this.template;
+        return this.root;
     }
 }

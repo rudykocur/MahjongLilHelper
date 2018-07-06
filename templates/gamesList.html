@@ -2,6 +2,16 @@
     <div>
         <h1>Mahjong Games List</h1>
         <button class="button">Utwórz nową grę</button>
-        <ul class="gamesList"></ul>
+        <ul class="gamesList" data-slot="games"></ul>
     </div>
+
+    <template data-name="gameRow">
+        <li>
+            Runda <span data-slot="roundNumber"></span>:
+                <span data-slot="player1Name"></span> (<span data-slot="player1Score"></span>),
+                <span data-slot="player2Name"></span> (<span data-slot="player2Score"></span>),
+                <span data-slot="player3Name"></span> (<span data-slot="player3Score"></span>),
+                <span data-slot="player4Name"></span> (<span data-slot="player4Score"></span>)
+        </li>
+    </template>
 </body>

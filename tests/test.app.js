@@ -9,6 +9,7 @@ import {EventEmitter} from "../js/utils";
 import {MahjongLilHelperMainViewController, MainAppUI} from "../js/app";
 import {Hand, Kong, Pung, Tiles} from "../js/hand";
 import {DomTemplate} from "../js/view/templates";
+import {HTMLDriver, loadTemplateHtml} from "./utils";
 
 function createGame() {
     return new Game(new Player(0, 'P1'), new Player(1, 'P2'), new Player(2, 'P3'), new Player(3, 'P4'));
@@ -253,8 +254,12 @@ describe('Main App tests', () => {
                 },
             };
 
-            view = new MainAppUI(new DomTemplate(document.createElement('div')),
-                panels.handCreator, panels.balanceTable, panels.gameList, panels.newGameForm);
+            return loadTemplateHtml('app.html').then((dom) => {
+                let driver = new HTMLDriver(dom);
+
+                view = new MainAppUI(new DomTemplate(driver.root),
+                    panels.handCreator, panels.balanceTable, panels.gameList, panels.newGameForm);
+            })
         });
 
         it('hide all panels by default', () => {

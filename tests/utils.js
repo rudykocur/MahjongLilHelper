@@ -8,7 +8,7 @@ export class HTMLDriver {
         /**
          * @type HTMLElement
          */
-        this.root = dom.window.document.body;
+        this.root = dom.window.document;
     }
 
     _fireEvent(selectorOrElement, eventName) {
@@ -40,4 +40,8 @@ export function loadTemplateHtml(fileName) {
 
 export function loadTestHtml(fileName) {
     return jsdom.JSDOM.fromFile(`./tests/test_html/${fileName}`)
+}
+
+export function normalize(str) {
+    return str.trim().replace(/\s+/g, ' ');
 }

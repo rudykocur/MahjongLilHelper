@@ -1,4 +1,4 @@
-import {HTMLDriver} from "../utils";
+import {HTMLDriver, normalize} from "../utils";
 
 export class GamesListViewDriver extends HTMLDriver {
     constructor(dom) {
@@ -10,7 +10,7 @@ export class GamesListViewDriver extends HTMLDriver {
     }
 
     getGameTitles() {
-        return this._getGamesRows().map(node => node.textContent);
+        return this._getGamesRows().map(node => normalize(node.textContent));
     }
 
     clickGame(gameIndex) {

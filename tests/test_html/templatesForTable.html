@@ -1,0 +1,25 @@
+<body>
+    <template data-name="tableTemplate">
+        <table>
+            <thead>
+            <tr>
+                <th>Head 1</th>
+                <th>Head 2</th>
+            </tr>
+            </thead>
+            <tbody data-slot="rows"></tbody>
+        </table>
+
+
+        <template data-name="row">
+            <tr>
+                <td>CONSTANT 1</td>
+                <td data-slot="slot1"></td>
+            </tr>
+            <tr>
+                <td data-slot="slot2"></td>
+                <td data-slot="slot1">FILLED FROM SLOT</td>
+            </tr>
+        </template>
+    </template>
+</body>

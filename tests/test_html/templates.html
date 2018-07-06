@@ -1,15 +1,32 @@
 <body>
 
 <template data-name="template 1">
-    <div>Lorem ipsum dolor sit amet</div>
+    <div>Lorem ipsum dolor sit amet 1</div>
 </template>
 
 <template data-name="template 2">
-    <tr>Lorem ipsum dolor sit amet</tr>
+    <tr>Lorem ipsum dolor sit amet 2</tr>
 </template>
 
 <template data-name="template 3">
     <span>Lorem ipsum <span data-slot="slot1">SLOT DATA</span> dolor sit amet</span>
+</template>
+
+<template data-name="template 4">
+    <span>Lorem <span data-slot="slot1">FOO</span> ipsum</span>
+
+    <template data-name="sub template 1"><span>LOL</span></template>
+    <template data-name="sub template 2">
+        <span>
+        Lorem ipsum <span data-slot="innerSlot1">XXX</span> DOLOR SIT
+        </span>
+    </template>
+</template>
+
+<template data-name="template 5">
+    <div>LIST: <ul data-slot="values"></ul></div>
+
+    <template data-name="listItem"><li data-slot="label"></li></template>
 </template>
 
 </body>
