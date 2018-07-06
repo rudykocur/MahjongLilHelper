@@ -167,7 +167,15 @@ describe('DOM: TemplateContainer tests', () => {
         expect(normalize(tmpl.getRoot().textContent)).to.be.equal('LIST: AAABBB');
     });
 
+    it('clear slot', () => {
+        let tmpl = new TemplateContainer();
+        tmpl.discover(html);
 
+        let node = tmpl.create('template 3');
+        node.fillSlot('slot1', 'DAWG');
+        node.clearSlot('slot1');
+        expect(normalize(node.getRoot().textContent)).to.be.equal('Lorem ipsum dolor sit amet');
+    })
 });
 
 describe('DOM: TemplateContainer with tables', () => {
