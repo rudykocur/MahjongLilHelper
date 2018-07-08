@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "autowatch": "^0.1.1",
     "babel-cli": "^6.26.0",
     "babel-plugin-syntax-decorators": "^6.13.0",
     "babel-plugin-syntax-flow": "^6.18.0",
@@ -25,6 +26,7 @@
     "browserify": "^16.2.2",
     "chai": "^4.1.2",
     "gulp": "^3.9.1",
+    "gulp-autowatch": "^1.0.2",
     "gulp-babel": "^7.0.1",
     "gulp-image-resize": "^0.13.0",
     "gulp-inject": "^4.3.2",

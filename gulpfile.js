@@ -6,6 +6,7 @@ const babel = require('gulp-babel');
 const path = require('path'),
     spritesmith = require('gulp.spritesmith'),
     imageResize = require('gulp-image-resize'),
+    autowatch = require('gulp-autowatch'),
     less = require('gulp-less'),
     sloc = require('gulp-sloc2'),
     rename = require('gulp-rename'),
@@ -15,6 +16,12 @@ const path = require('path'),
     uglify = require('gulp-uglify'),
     browserify = require('browserify'),
     inject = require('gulp-inject');
+
+const paths = {
+    index: './templates/*.html',
+    less: './*.less',
+    app: 'js/**/*.js',
+};
 
 gulp.task('babel-src', () => {
     return gulp.src('js/**/*.js')
@@ -87,7 +94,7 @@ gulp.task('sloc', () => {
         }));
 });
 
-gulp.task('default', ['index', 'less', 'css-sprites'], () => {
+gulp.task('app', () => {
     return browserify({
         entries: ['./js/init.js'],
         debug: true})
@@ -103,3 +110,9 @@ gulp.task('default', ['index', 'less', 'css-sprites'], () => {
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest('./dist'));
 });
+
+gulp.task('watch', function() {
+  autowatch(gulp, paths);
+});
+
+gulp.task('default', ['index', 'less', 'css-sprites', 'app']);

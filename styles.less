@@ -1,4 +1,6 @@
 
+@hoverBackground: #ffffdc;
+
 table {
     td, th {
         padding: 2px 4px;
@@ -16,7 +18,7 @@ table {
 
         tr:nth-child(2n - 1) td:nth-child(n+3):hover {
             cursor: pointer;
-            background: #ffffdc;
+            background: @hoverBackground;
         }
 
         .winner {
@@ -48,6 +50,14 @@ table {
 
     .suitGroups li {
         border: solid 1px gray;
+        padding: 3px;
+        line-height: 0;
+
+      &:hover {
+        background: @hoverBackground;
+        cursor: pointer;
+      }
+
     }
 
     .suitGroups ul {
@@ -85,7 +95,7 @@ table {
         right: 3px;
 
         &:hover {
-            background: #ffffdc;
+            background: @hoverBackground;
         }
     }
 
@@ -97,8 +107,6 @@ table {
 .tile-icon {
     display: inline-block;
 }
-
-
 
 img.tile {
     width: 3rem;
@@ -116,5 +124,5 @@ img.tile {
 }
 
 .gamesList li:hover {
-    background: #ffffdc;
+    background: @hoverBackground;
 }

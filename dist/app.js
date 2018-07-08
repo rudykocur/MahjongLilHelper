@@ -1169,11 +1169,20 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var tmpl = _needlepoint.container.resolve(_templates.TemplateContainer);
     tmpl.discover(document.body);
 
+    /**
+     * @type {MahjongLilHelperMainViewController}
+     */
     var ctrl = _needlepoint.container.resolve(_app.MahjongLilHelperMainViewController);
 
     ctrl.view.mount(document.getElementById('mahjongContent'));
 
     ctrl.load();
+
+    ctrl.view.gameList.gameSelectedEvent.emit(ctrl.games[0]);
+    ctrl.view.balanceTable.onHandEditClick.emit({
+        round: ctrl.games[0].rounds[0],
+        player: ctrl.games[0].players[0]
+    });
 
     console.log('READY', ctrl);
 });

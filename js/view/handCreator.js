@@ -230,7 +230,6 @@ class HandCreatorView extends GamePanel{
 }
 
 
-
 class HandCreatorTileView {
     constructor(tile) {
         this.tile = tile;

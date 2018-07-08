@@ -33,6 +33,12 @@ table tr:nth-child(2n) td {
 }
 #handCreator .suitGroups li {
   border: solid 1px gray;
+  padding: 3px;
+  line-height: 0;
+}
+#handCreator .suitGroups li:hover {
+  background: #ffffdc;
+  cursor: pointer;
 }
 #handCreator .suitGroups ul {
   margin: 2px;

@@ -18,18 +18,34 @@
     </div>
     <div class="grid-x">
       <div class="cell small-6">
+          <h4>Zawartość ręki</h4>
           <div class="handContent clearfix"></div>
       </div>
       <div class="cell small-6">
+          <h4>Reguły punktowania</h4>
           <div class="handScoreRules"></div>
       </div>
     </div>
 
-    <div class="finishHandSection">
-        <label><input name="isWinner" type="checkbox"> Mahjong</label>
-        <label><input name="lastTileFromWall" type="checkbox"> Ostatni kamień z muru</label>
-        <label><input name="lastTileSpecial" type="checkbox"> Zwycięstwo z dna morza/rzeki/na dachu</label>
-        <label><input name="lastAvailableTile" type="checkbox"> Majhong ostatnim możliwym kamieniem</label>
+    <div class="grid-x finishHandSection">
+        <div class="cell small-6">
+            <h4>Zakończenie gry</h4>
+            <label><input name="isWinner" type="checkbox"> Mahjong</label>
+            <label><input name="lastTileFromWall" type="checkbox"> Ostatni kamień z muru</label>
+            <label><input name="lastTileSpecial" type="checkbox"> Zwycięstwo z dna morza/rzeki/na dachu</label>
+            <label><input name="lastAvailableTile" type="checkbox"> Majhong ostatnim możliwym kamieniem</label>
+
+        </div>
+        <div class="cell small-6">
+            <h4>Układy specjalne</h4>
+            <label><input name="specialSet" type="radio" value="minor-hunt">Mniejszy, polowanie (1/5 limitu)</label>
+            <label><input name="specialSet" type="radio" value="minor-mahjong">Mniejszy, mahjong (1/2 limitu)</label>
+            <label><input name="specialSet" type="radio" value="major-hunt">Większy, polowanie (2/5 limitu)</label>
+            <label><input name="specialSet" type="radio" value="major-mahjong">Większy, majhong (limit)</label>
+            <label><input name="specialSet" type="radio" value="">Brak</label>
+        </div>
+    </div>
+    <div>
         <button class="button small" data-action="finishHand">Zakończ tworzenie ręki</button>
     </div>
 </form>
