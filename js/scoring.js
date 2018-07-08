@@ -1,6 +1,6 @@
 
 import * as h from './hand.js';
-import {BonusTile} from "./hand";
+import {BonusTile, SpecialSets} from "./hand";
 
 
 function calcPungKongValue(baseValue, tileSet) {
@@ -24,55 +24,79 @@ function applyMultipliers(numMultipliers, value) {
 }
 
 class ScoreCalculator {
-    constructor(pointsRules, multipliersForAll, multipliersForWinner) {
+    constructor(pointsRules, multipliersForAll, multipliersForWinner, specialSetsRules) {
         this.pointsRules = pointsRules;
         this.multiplierRulesForAll = multipliersForAll;
         this.multiplierRulesForWinner = multipliersForWinner;
+        this.specialSetsRules = specialSetsRules;
     }
 
     /**
-     * @param round
-     * @param player
+     * @param {Round} round
+     * @param {Player} player
      * @return {{score,multipliers,points}}
      */
     calculateExtendedScore(round, player) {
         let hand = round.getHand(player).hand;
 
         if(hand === null) {
-            return 0;
+            return {
+                score: 0,
+                multipliers: [],
+                points: [],
+            };
         }
 
         let appliedPoints = [];
         let appliedMultipliers = [];
 
-        let points = this.pointsRules.reduce((value, rule) => {
-            let p = rule.getPoints(hand, round, player);
-            if(p) {
-                appliedPoints.push({rule: rule, amount: p});
+        let points = 0;
+        let multipliers = 0;
+
+        let specialPoints = this.specialSetsRules.map((/*SpecialSetRule*/rule) => {
+            return {
+                rule: rule,
+                amount: rule.getPoints(hand, round, player),
             }
-            return value + (p || 0)
-        }, 0);
+        }).filter(rule => rule.amount > 0);
 
-        let multipliers = this.multiplierRulesForAll.reduce((value, rule) => {
-            let mult = rule.getMultipliers(hand, round, player);
+        if(specialPoints.length > 0) {
+            points = round.game.roundLimit * specialPoints[0].amount;
+            appliedPoints.push({
+                rule: specialPoints[0].rule,
+                amount: points,
+            });
+        }
+        else {
+            points = this.pointsRules.reduce((value, rule) => {
+                let p = rule.getPoints(hand, round, player);
+                if (p) {
+                    appliedPoints.push({rule: rule, amount: p});
+                }
+                return value + (p || 0)
+            }, 0);
 
-            if(mult) {
-                appliedMultipliers.push({rule: rule, amount: mult});
-            }
-
-            return value + (mult || 0)
-        }, 0);
-
-        if(round.winner === player) {
-            multipliers = this.multiplierRulesForWinner.reduce((value, rule) => {
+            multipliers = this.multiplierRulesForAll.reduce((value, rule) => {
                 let mult = rule.getMultipliers(hand, round, player);
 
-                if(mult) {
+                if (mult) {
                     appliedMultipliers.push({rule: rule, amount: mult});
                 }
 
                 return value + (mult || 0)
-            }, multipliers);
+            }, 0);
+
+            if (round.winner === player) {
+                multipliers = this.multiplierRulesForWinner.reduce((value, rule) => {
+                    let mult = rule.getMultipliers(hand, round, player);
+
+                    if (mult) {
+                        appliedMultipliers.push({rule: rule, amount: mult});
+                    }
+
+                    return value + (mult || 0)
+                }, multipliers);
+            }
         }
 
         return {
@@ -120,7 +144,31 @@ class ScoreCalculator {
             new NoHonourSameSuitTiles(),
         ];
 
-        return new ScoreCalculator(pointsRules, multiplierRulesForAll, multiplierRulesForWinner);
+        let specialSetsRules = [
+            new SpecialSetRule(),
+        ];
+
+        return new ScoreCalculator(pointsRules, multiplierRulesForAll, multiplierRulesForWinner,
+            specialSetsRules);
+    }
+}
+
+class SpecialSetRule {
+    /**
+     * @param {Hand} hand
+     * @param {Round} round
+     * @param {Player} player
+     */
+    getPoints(hand, round, player) {
+        if(hand.specialSet) {
+            if(hand.specialSet === SpecialSets.minor) {
+                return (round.winner === player) ? 0.5 : 0.2;
+            }
+
+            if(hand.specialSet === SpecialSets.major) {
+                return (round.winner === player) ? 1 : 0.4;
+            }
+        }
     }
 }
 

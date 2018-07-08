@@ -1,6 +1,6 @@
 import {Game, Player} from "../js/game";
 import {GameSerializer, MahjongDatabase} from "../js/db";
-import {Chow, FreeTiles, Hand, Kong, Pair, Pung, Tiles} from "../js/hand";
+import {Chow, FreeTiles, Hand, Kong, Pair, Pung, SpecialSets, Tiles} from "../js/hand";
 
 const expect = require('chai').expect;
 const sinon = require('sinon');
@@ -38,6 +38,10 @@ describe('Database access tests', () => {
 
         round1.setWinner(game.players[3], true, true);
 
+        let p2r2Hand = new Hand();
+        p2r2Hand.setSpecialSet(SpecialSets.major);
+        round2.setHand(game.players[0], p2r2Hand);
+
         let gameJson = serializer.serialize(game);
 
         let expectedGameJson = {
@@ -53,42 +57,56 @@ describe('Database access tests', () => {
                     lastAvailableTile: true,
                     lastTileFromWall: true,
                     hands: [
-                        [  // Player 1 hand, round 1
-                            {
-                                type: 'pung',
-                                isRevealed: true,
-                                tile: 'Bamboo3',
-                            },
-                            {
-                                type: 'kong',
-                                isRevealed: false,
-                                tile: 'Bamboo2',
-                            }
-                        ],
-                        [  // Player 2 hand, round 1
-                            {
-                                type: 'pair',
-                                tile: 'Bamboo4',
-                            },
-                            {
-                                type: 'chow',
-                                isRevealed: false,
-                                tiles: ['Circle2', 'Circle3', 'Circle4']
-                            }
-                        ],
-                        [  // Player 3 hand, round 1
-                            {
-                                type: 'free',
-                                tiles: ['BonusFlower1', 'BonusFlower4', 'BonusSummer'],
-                            }
-                        ],
+                        {
+                            sets: [  // Player 1 hand, round 1
+                                {
+                                    type: 'pung',
+                                    isRevealed: true,
+                                    tile: 'Bamboo3',
+                                },
+                                {
+                                    type: 'kong',
+                                    isRevealed: false,
+                                    tile: 'Bamboo2',
+                                }
+                            ],
+                            specialSet: null
+                        },
+                        {
+                            sets: [  // Player 2 hand, round 1
+                                {
+                                    type: 'pair',
+                                    tile: 'Bamboo4',
+                                },
+                                {
+                                    type: 'chow',
+                                    isRevealed: false,
+                                    tiles: ['Circle2', 'Circle3', 'Circle4']
+                                }
+                            ],
+                            specialSet: null
+                        },
+                        {
+                            sets: [  // Player 3 hand, round 1
+                                {
+                                    type: 'free',
+                                    tiles: ['BonusFlower1', 'BonusFlower4', 'BonusSummer'],
+                                }
+                            ],
+                            specialSet: null
+                        },
                         null]
                 },
                 {
                     winner: null,
                     lastAvailableTile: false,
                     lastTileFromWall: false,
-                    hands: [null, null, null, null]
+                    hands: [
+                        {
+                            sets: [],
+                            specialSet: 'major',
+                        },
+                        null, null, null]
                 },
             ]
         };
@@ -124,18 +142,21 @@ describe('Database access tests', () => {
                     lastAvailableTile: false,
                     lastTileFromWall: false,
                     hands: [
-                        [  // Player 1 hand, round 1
-                            {
-                                type: 'pung',
-                                isRevealed: true,
-                                tile: 'Bamboo3',
-                            },
-                            {
-                                type: 'kong',
-                                isRevealed: false,
-                                tile: 'Bamboo2',
-                            }
-                        ],
+                        {
+                            sets: [  // Player 1 hand, round 1
+                                {
+                                    type: 'pung',
+                                    isRevealed: true,
+                                    tile: 'Bamboo3',
+                                },
+                                {
+                                    type: 'kong',
+                                    isRevealed: false,
+                                    tile: 'Bamboo2',
+                                }
+                            ],
+                            specialSet: null
+                        },
                         null,
                         null,
                         null]
@@ -162,42 +183,55 @@ describe('Database access tests', () => {
                     lastAvailableTile: true,
                     lastTileFromWall: true,
                     hands: [
-                        [  // Player 1 hand, round 1
-                            {
-                                type: 'pung',
-                                isRevealed: true,
-                                tile: 'Bamboo3',
-                            },
-                            {
-                                type: 'kong',
-                                isRevealed: false,
-                                tile: 'Bamboo2',
-                            }
-                        ],
-                        [  // Player 2 hand, round 1
-                            {
-                                type: 'pair',
-                                tile: 'Bamboo4',
-                            },
-                            {
-                                type: 'chow',
-                                isRevealed: false,
-                                tiles: ['Circle2', 'Circle3', 'Circle4']
-                            }
-                        ],
-                        [  // Player 3 hand, round 1
-                            {
-                                type: 'free',
-                                tiles: ['BonusFlower1', 'BonusFlower4', 'BonusSummer'],
-                            }
-                        ],
-                        null]
+                        {
+                            sets: [  // Player 1 hand, round 1
+                                {
+                                    type: 'pung',
+                                    isRevealed: true,
+                                    tile: 'Bamboo3',
+                                },
+                                {
+                                    type: 'kong',
+                                    isRevealed: false,
+                                    tile: 'Bamboo2',
+                                }
+                            ]
+                        },
+                        {
+                            sets: [  // Player 2 hand, round 1
+                                {
+                                    type: 'pair',
+                                    tile: 'Bamboo4',
+                                },
+                                {
+                                    type: 'chow',
+                                    isRevealed: false,
+                                    tiles: ['Circle2', 'Circle3', 'Circle4']
+                                }
+                            ]
+                        },
+                        {
+                            sets:
+                                [  // Player 3 hand, round 1
+                                    {
+                                        type: 'free',
+                                        tiles: ['BonusFlower1', 'BonusFlower4', 'BonusSummer'],
+                                    }
+                                ]
+                        },
+                        null
+                    ]
                 },
                 {
                     winner: null,
                     lastAvailableTile: false,
                     lastTileFromWall: false,
-                    hands: [null, null, null, null]
+                    hands: [
+                        {
+                            sets: [],
+                            specialSet: 'major',
+                        },
+                        null, null, null]
                 },
             ]
         };
@@ -247,10 +281,86 @@ describe('Database access tests', () => {
         expect(round2.lastTileFromWall).to.be.equal(false);
         expect(round2.lastAvailableTile).to.be.equal(false);
 
-        expect(round2.getHand(loadedGame.players[0]).hand).to.be.eql(null);
+        expect(round2.getHand(loadedGame.players[0]).hand.sets).to.be.eql([]);
+        expect(round2.getHand(loadedGame.players[0]).hand.specialSet).to.be.eql(SpecialSets.major);
         expect(round2.getHand(loadedGame.players[1]).hand).to.be.eql(null);
         expect(round2.getHand(loadedGame.players[2]).hand).to.be.eql(null);
         expect(round2.getHand(loadedGame.players[3]).hand).to.be.eql(null);
+    });
+
+    it('deserialize older-style hand', () => {
+        let serializer = new GameSerializer();
+
+        let gameSave = {
+            players: [
+                {name: 'P1', seatNumber: 0},
+                {name: 'P2', seatNumber: 1},
+                {name: 'P3', seatNumber: 2},
+                {name: 'P4', seatNumber: 3},
+            ],
+            rounds: [
+                {
+                    winner: 3,
+                    lastAvailableTile: true,
+                    lastTileFromWall: true,
+                    hands: [
+                        [  // Player 1 hand, round 1
+                            {
+                                type: 'pung',
+                                isRevealed: true,
+                                tile: 'Bamboo3',
+                            },
+                            {
+                                type: 'kong',
+                                isRevealed: false,
+                                tile: 'Bamboo2',
+                            }
+                        ],
+                        [  // Player 2 hand, round 1
+                            {
+                                type: 'pair',
+                                tile: 'Bamboo4',
+                            },
+                            {
+                                type: 'chow',
+                                isRevealed: false,
+                                tiles: ['Circle2', 'Circle3', 'Circle4']
+                            }
+                        ],
+                        [  // Player 3 hand, round 1
+                            {
+                                type: 'free',
+                                tiles: ['BonusFlower1', 'BonusFlower4', 'BonusSummer'],
+                            }
+                        ],
+                        null]
+                },
+            ]
+        };
+
+        /**
+         * @type {Game}
+         */
+        let loadedGame = serializer.deserialize(gameSave);
+
+        /**
+         * @type {Round}
+         */
+        let round1 = loadedGame.rounds[0];
+
+        expect(round1.getHand(loadedGame.players[0]).hand.sets).to.be.eql([
+            new Pung(true, Tiles.Bamboo3),
+            new Kong(false, Tiles.Bamboo2)
+        ]);
+
+        expect(round1.getHand(loadedGame.players[1]).hand.sets).to.be.eql([
+            new Pair(Tiles.Bamboo4),
+            new Chow(false, Tiles.Circle2, Tiles.Circle3, Tiles.Circle4)
+        ]);
+
+        expect(round1.getHand(loadedGame.players[2]).hand.sets).to.be.eql([
+            new FreeTiles([Tiles.BonusFlower1, Tiles.BonusFlower4, Tiles.BonusSummer])
+        ]);
     });
 
     it('test loading games from database', () => {

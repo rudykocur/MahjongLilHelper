@@ -1,11 +1,13 @@
 import {HandCreatorViewDriver, SELECTORS} from "./drivers/driver.handCreator";
 
 const mochaJsdom = require('mocha-jsdom');
-import {Hand, Tiles, Pung, Kong, Pair, FreeTiles} from "../js/hand";
+import {Hand, Tiles, Pung, Kong, Pair, FreeTiles, SpecialSets} from "../js/hand";
 import {Player, Game} from "../js/game";
 
 const jsdom = require("jsdom");
 const expect = require('chai').expect;
+const sinon = require('sinon');
+require('chai').use(require('sinon-chai'));
 
 import {loadTemplateHtml} from "./utils";
 
@@ -71,6 +73,7 @@ describe('DOM: hand creator tests', () => {
             view.onEditFinish.addListener((/*OnEditFinishEvent*/ data) => {
                 expect(data.player.name).to.be.equal(player.name);
                 expect(data.round.roundNumber).to.be.equal(1);
+                expect(data.specialSet).to.be.equal('');
                 done();
             });
 
@@ -121,6 +124,19 @@ describe('DOM: hand creator tests', () => {
             driver.click(SELECTORS.btnFinishHand);
         });
 
+        it('selecting special set', function () {
+            let callback = sinon.spy();
+
+            let view = initDefaultView();
+            view.onEditFinish.addListener(callback);
+
+            driver.selectSpecialSet(SpecialSets.major);
+            driver.click(SELECTORS.btnFinishHand);
+
+            expect(callback.callCount).to.be.equal(1);
+            expect(callback.firstCall.args[0].specialSet).to.be.equal('major');
+        });
+
         it('saving loaded hand', (done) => {
             let hand = new Hand();
             hand.addSet(new Pung(true, Tiles.Bamboo5));
@@ -160,6 +176,18 @@ describe('DOM: hand creator tests', () => {
             expect(driver.getIsLastAvailableTileChecked()).to.be.true;
             expect(driver.getIsLastTileFromWallChecked()).to.be.true;
             expect(driver.getIsLastTileSpecialChecked()).to.be.true;
+        });
+
+        it('loading hand state special set', () => {
+            let hand = new Hand();
+            hand.addSet(new Pung(true, Tiles.Bamboo5));
+            hand.setSpecialSet(SpecialSets.minor);
+            round.setHand(player, hand);
+
+            let view = getView();
+            view.showHand(round, player);
+
+            expect(driver.getSpecialSetValue()).to.be.equal(SpecialSets.minor);
         });
 
         it('loading normal hand after winner hand', () => {

@@ -1,6 +1,6 @@
 
 import {dependencies} from 'needlepoint';
-import {Chow, FreeTiles, Hand, Kong, Pair, Pung, Tiles} from "./hand";
+import {Chow, FreeTiles, Hand, Kong, Pair, Pung, SpecialSets, Tiles} from "./hand";
 import {Game, Player} from "./game";
 
 export class LocalStorageDriver {
@@ -47,9 +47,13 @@ export class GameSerializer {
 
                 let hand = new Hand();
 
-                handData.forEach(setData => {
+                (handData.sets || handData).forEach(setData => {
                     hand.addSet(this._deserializeTileset(setData));
                 });
+
+                if(handData.specialSet) {
+                    hand.setSpecialSet(SpecialSets[handData.specialSet]);
+                }
 
                 round.setHand(players[playerIndex], hand);
             });
@@ -66,7 +70,10 @@ export class GameSerializer {
      * @param {Hand} hand
      */
     _serializeHand(hand) {
-        return hand.sets.map(this._serializeTileset, this);
+        return {
+            sets: hand.sets.map(this._serializeTileset, this),
+            specialSet: hand.specialSet,
+        };
     }
 
     /**

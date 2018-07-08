@@ -9,6 +9,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
     let tmpl = container.resolve(TemplateContainer);
     tmpl.discover(document.body);
 
+    /**
+     * @type {MahjongLilHelperMainViewController}
+     */
     let ctrl = container.resolve(MahjongLilHelperMainViewController);
 
     ctrl.view.mount(document.getElementById('mahjongContent'));

@@ -115,4 +115,8 @@ gulp.task('watch', function() {
   autowatch(gulp, paths);
 });
 
-gulp.task('default', ['index', 'less', 'css-sprites', 'app']);
+gulp.task('dist', ['index', 'less', 'css-sprites', 'app']);
+
+gulp.task('default', ['tests'], () => {
+    return gulp.start('dist');
+});

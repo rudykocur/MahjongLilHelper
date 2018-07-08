@@ -27,6 +27,7 @@ class HandCreatorView extends GamePanel{
         this.form = this.root.querySelector('form');
 
         this.handRevealedInput = this.form.elements['revealed'];
+        this.specialSetInput = this.form.elements['specialSet'];
         this.isWinnerInput = this.form.elements['isWinner'];
         this.lastTileFromWallInput = this.form.elements['lastTileFromWall'];
         this.lastAvailableTileInput = this.form.elements['lastAvailableTile'];
@@ -100,6 +101,7 @@ class HandCreatorView extends GamePanel{
                 lastTileFromWall: this.lastTileFromWallInput.checked,
                 lastAvailableTile: this.lastAvailableTileInput.checked,
                 lastTileSpecial: this.lastTileSpecialInput.checked,
+                specialSet: this.specialSetInput.value,
             });
         });
     }
@@ -121,12 +123,17 @@ class HandCreatorView extends GamePanel{
 
         this.refreshHandContent();
 
+        /**
+         * @type {Hand}
+         */
         let hand = round.getHand(player).hand;
 
         this.isWinnerInput.checked = false;
         this.lastTileFromWallInput.checked = false;
         this.lastAvailableTileInput.checked = false;
         this.lastTileSpecialInput.checked = false;
+        this.specialSetInput.value = '';
+        Array.from(this.specialSetInput).forEach(i => i.checked=false);
 
         if(hand) {
             hand.sets.forEach(s => this.renderNewTileset(s));
@@ -137,6 +144,10 @@ class HandCreatorView extends GamePanel{
                 this.lastTileFromWallInput.checked = round.lastTileFromWall;
                 this.lastAvailableTileInput.checked = round.lastAvailableTile;
                 this.lastTileSpecialInput.checked = round.lastTileSpecial;
+            }
+
+            if(hand.specialSet) {
+                this.specialSetInput.value = hand.specialSet;
             }
 
             let score = round.scoreCalculator.calculateExtendedScore(round, player);

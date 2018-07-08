@@ -33,6 +33,11 @@ const Bonus = {
     WINTER: 'winter',
 };
 
+const SpecialSets = {
+    'minor': 'minor',
+    'major': 'major',
+};
+
 
 class Tile {
     constructor(isSuit, isHonour) {
@@ -268,6 +273,11 @@ class Hand {
          */
         this.tiles = [];
         this.sets = [];
+        this.specialSet = null;
+    }
+
+    setSpecialSet(specialSet) {
+        this.specialSet = specialSet;
     }
 
     addTile(tile) {
@@ -301,12 +311,7 @@ class Hand {
     }
 }
 
-// module.exports = {
-//     Hand, Tiles, SuitTile, Suits, Dragons, DragonTile, Winds, WindTile, Bonus, BonusTile,
-//     Chow, Kong, Pung, Pair, WindOrder
-// };
-
 export {
     Hand, Tiles, SuitTile, Suits, Dragons, DragonTile, Winds, WindTile, Bonus, BonusTile,
-    Chow, Kong, Pung, Pair, FreeTiles, WindOrder, TileGroups
+    Chow, Kong, Pung, Pair, FreeTiles, WindOrder, TileGroups, SpecialSets
 };

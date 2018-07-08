@@ -9,9 +9,15 @@ class Player {
 }
 
 class Round {
-    constructor(players, roundIndex) {
+    /**
+     * @param {Array<Player>} players
+     * @param {Number} roundIndex
+     * @param {Game} game
+     */
+    constructor(players, roundIndex, game) {
         this.roundNumber = roundIndex + 1;
         this.roundIndex = roundIndex;
+        this.game = game;
 
         this.balanceCalculator = new RoundBalanceCalculator();
 
@@ -139,13 +145,15 @@ class Game {
          * @type {Array<Round>}
          */
         this.rounds = [];
+
+        this.roundLimit = 1000;
     }
 
     /**
      * @return {Round}
      */
     createRound() {
-        let round = new Round(this.players, this.rounds.length);
+        let round = new Round(this.players, this.rounds.length, this);
 
         this.rounds.push(round);
 

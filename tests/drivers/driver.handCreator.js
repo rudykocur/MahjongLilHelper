@@ -35,6 +35,10 @@ export class HandCreatorViewDriver extends HTMLDriver{
         }
     }
 
+    selectSpecialSet(specialSetType) {
+        this._setRadio(this.form, 'specialSet', specialSetType);
+    }
+
     getSelectedTilesCount() {
         return this.root.querySelectorAll('.suitGroups .selected').length;
     }
@@ -77,5 +81,9 @@ export class HandCreatorViewDriver extends HTMLDriver{
 
     getIsLastAvailableTileChecked() {
         return this.root.querySelector(SELECTORS.checkboxLastAvailableTile).checked;
+    }
+
+    getSpecialSetValue() {
+        return this.form.elements['specialSet'].value;
     }
 }

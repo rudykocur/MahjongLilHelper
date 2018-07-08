@@ -41,6 +41,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * @property {boolean} lastTileFromWall
  * @property {boolean} lastAvailableTile
  * @property {boolean} lastTileSpecial
+ * @property {String} specialSet
  */
 
 /**
@@ -215,6 +216,10 @@ var MahjongLilHelperMainViewController = exports.MahjongLilHelperMainViewControl
                 return hand.addSet(set);
             });
 
+            if (event.specialSet) {
+                hand.setSpecialSet(event.specialSet);
+            }
+
             event.round.setHand(event.player, hand);
             if (event.isWinner) {
                 event.round.setWinner(event.player, event.lastAvailableTile, event.lastTileFromWall);
@@ -323,9 +328,13 @@ var GameSerializer = exports.GameSerializer = function () {
 
                     var hand = new _hand.Hand();
 
-                    handData.forEach(function (setData) {
+                    (handData.sets || handData).forEach(function (setData) {
                         hand.addSet(_this2._deserializeTileset(setData));
                     });
+
+                    if (handData.specialSet) {
+                        hand.setSpecialSet(_hand.SpecialSets[handData.specialSet]);
+                    }
 
                     round.setHand(players[playerIndex], hand);
                 });
@@ -345,7 +354,10 @@ var GameSerializer = exports.GameSerializer = function () {
     }, {
         key: "_serializeHand",
         value: function _serializeHand(hand) {
-            return hand.sets.map(this._serializeTileset, this);
+            return {
+                sets: hand.sets.map(this._serializeTileset, this),
+                specialSet: hand.specialSet
+            };
         }
 
         /**
@@ -515,11 +527,18 @@ var Player = function Player(seatNumber, name) {
 };
 
 var Round = function () {
-    function Round(players, roundIndex) {
+    /**
+     *
+     * @param {Array<Player>} players
+     * @param {Number} roundIndex
+     * @param {Game} game
+     */
+    function Round(players, roundIndex, game) {
         _classCallCheck(this, Round);
 
         this.roundNumber = roundIndex + 1;
         this.roundIndex = roundIndex;
+        this.game = game;
 
         this.balanceCalculator = new RoundBalanceCalculator();
 
@@ -663,6 +682,8 @@ var Game = function () {
          * @type {Array<Round>}
          */
         this.rounds = [];
+
+        this.roundLimit = 1000;
     }
 
     /**
@@ -673,7 +694,7 @@ var Game = function () {
     _createClass(Game, [{
         key: 'createRound',
         value: function createRound() {
-            var round = new Round(this.players, this.rounds.length);
+            var round = new Round(this.players, this.rounds.length, this);
 
             this.rounds.push(round);
 
@@ -762,6 +783,11 @@ var Bonus = {
     SPRING: 'spring',
     AUTUMN: 'autumn',
     WINTER: 'winter'
+};
+
+var SpecialSets = {
+    'minor': 'minor',
+    'major': 'major'
 };
 
 var Tile = function () {
@@ -1078,9 +1104,15 @@ var Hand = function () {
          */
         this.tiles = [];
         this.sets = [];
+        this.specialSet = null;
     }
 
     _createClass(Hand, [{
+        key: 'setSpecialSet',
+        value: function setSpecialSet(specialSet) {
+            this.specialSet = specialSet;
+        }
+    }, {
         key: 'addTile',
         value: function addTile(tile) {
             this.tiles.push(tile);
@@ -1130,11 +1162,6 @@ var Hand = function () {
     return Hand;
 }();
 
-// module.exports = {
-//     Hand, Tiles, SuitTile, Suits, Dragons, DragonTile, Winds, WindTile, Bonus, BonusTile,
-//     Chow, Kong, Pung, Pair, WindOrder
-// };
-
 exports.Hand = Hand;
 exports.Tiles = Tiles;
 exports.SuitTile = SuitTile;
@@ -1152,6 +1179,7 @@ exports.Pair = Pair;
 exports.FreeTiles = FreeTiles;
 exports.WindOrder = WindOrder;
 exports.TileGroups = TileGroups;
+exports.SpecialSets = SpecialSets;
 
 },{}],5:[function(require,module,exports){
 "use strict";
@@ -1234,17 +1262,18 @@ function applyMultipliers(numMultipliers, value) {
 }
 
 var ScoreCalculator = function () {
-    function ScoreCalculator(pointsRules, multipliersForAll, multipliersForWinner) {
+    function ScoreCalculator(pointsRules, multipliersForAll, multipliersForWinner, specialSetsRules) {
         _classCallCheck(this, ScoreCalculator);
 
         this.pointsRules = pointsRules;
         this.multiplierRulesForAll = multipliersForAll;
         this.multiplierRulesForWinner = multipliersForWinner;
+        this.specialSetsRules = specialSetsRules;
     }
 
     /**
-     * @param round
-     * @param player
+     * @param {Round} round
+     * @param {Player} player
      * @return {{score,multipliers,points}}
      */
 
@@ -1255,32 +1284,44 @@ var ScoreCalculator = function () {
             var hand = round.getHand(player).hand;
 
             if (hand === null) {
-                return 0;
+                return {
+                    score: 0,
+                    multipliers: [],
+                    points: []
+                };
             }
 
             var appliedPoints = [];
             var appliedMultipliers = [];
 
-            var points = this.pointsRules.reduce(function (value, rule) {
-                var p = rule.getPoints(hand, round, player);
-                if (p) {
-                    appliedPoints.push({ rule: rule, amount: p });
-                }
-                return value + (p || 0);
-            }, 0);
+            var points = 0;
+            var multipliers = 0;
 
-            var multipliers = this.multiplierRulesForAll.reduce(function (value, rule) {
-                var mult = rule.getMultipliers(hand, round, player);
+            var specialPoints = this.specialSetsRules.map(function ( /*SpecialSetRule*/rule) {
+                return {
+                    rule: rule,
+                    amount: rule.getPoints(hand, round, player)
+                };
+            }).filter(function (rule) {
+                return rule.amount > 0;
+            });
 
-                if (mult) {
-                    appliedMultipliers.push({ rule: rule, amount: mult });
-                }
+            if (specialPoints.length > 0) {
+                points = round.game.roundLimit * specialPoints[0].amount;
+                appliedPoints.push({
+                    rule: specialPoints[0].rule,
+                    amount: points
+                });
+            } else {
+                points = this.pointsRules.reduce(function (value, rule) {
+                    var p = rule.getPoints(hand, round, player);
+                    if (p) {
+                        appliedPoints.push({ rule: rule, amount: p });
+                    }
+                    return value + (p || 0);
+                }, 0);
 
-                return value + (mult || 0);
-            }, 0);
-
-            if (round.winner === player) {
-                multipliers = this.multiplierRulesForWinner.reduce(function (value, rule) {
+                multipliers = this.multiplierRulesForAll.reduce(function (value, rule) {
                     var mult = rule.getMultipliers(hand, round, player);
 
                     if (mult) {
@@ -1288,7 +1329,19 @@ var ScoreCalculator = function () {
                     }
 
                     return value + (mult || 0);
-                }, multipliers);
+                }, 0);
+
+                if (round.winner === player) {
+                    multipliers = this.multiplierRulesForWinner.reduce(function (value, rule) {
+                        var mult = rule.getMultipliers(hand, round, player);
+
+                        if (mult) {
+                            appliedMultipliers.push({ rule: rule, amount: mult });
+                        }
+
+                        return value + (mult || 0);
+                    }, multipliers);
+                }
             }
 
             return {
@@ -1314,11 +1367,42 @@ var ScoreCalculator = function () {
             var multiplierRulesForAll = [new DragonSetMultiplier(), new RoundWindSetMultiplier(), new OwnWindSetMultiplier(), new ThreeConcealedPungsMultiplier(), new ThreeLittleSagesMultiplier(), new ThreeGrandSagesMultiplier(), new FourLittleBlessingsMultiplier(), new FourGrandBlessingsMultiplier()];
             var multiplierRulesForWinner = [new LastTileSpecialMultiplier(), new PureChowsMultiplier(), new NoChowsMultiplier(), new HalfColorMultiplier(), new OnlyHonourTilesMultiplier(), new NoHonourSameSuitTiles()];
 
-            return new ScoreCalculator(pointsRules, multiplierRulesForAll, multiplierRulesForWinner);
+            var specialSetsRules = [new SpecialSetRule()];
+
+            return new ScoreCalculator(pointsRules, multiplierRulesForAll, multiplierRulesForWinner, specialSetsRules);
         }
     }]);
 
     return ScoreCalculator;
+}();
+
+var SpecialSetRule = function () {
+    function SpecialSetRule() {
+        _classCallCheck(this, SpecialSetRule);
+    }
+
+    _createClass(SpecialSetRule, [{
+        key: "getPoints",
+
+        /**
+         * @param {Hand} hand
+         * @param {Round} round
+         * @param {Player} player
+         */
+        value: function getPoints(hand, round, player) {
+            if (hand.specialSet) {
+                if (hand.specialSet === _hand2.SpecialSets.minor) {
+                    return round.winner === player ? 0.5 : 0.2;
+                }
+
+                if (hand.specialSet === _hand2.SpecialSets.major) {
+                    return round.winner === player ? 1 : 0.4;
+                }
+            }
+        }
+    }]);
+
+    return SpecialSetRule;
 }();
 
 //#region Rules for points
@@ -2356,6 +2440,7 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
         _this.form = _this.root.querySelector('form');
 
         _this.handRevealedInput = _this.form.elements['revealed'];
+        _this.specialSetInput = _this.form.elements['specialSet'];
         _this.isWinnerInput = _this.form.elements['isWinner'];
         _this.lastTileFromWallInput = _this.form.elements['lastTileFromWall'];
         _this.lastAvailableTileInput = _this.form.elements['lastAvailableTile'];
@@ -2432,7 +2517,8 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
                 isWinner: _this.isWinnerInput.checked,
                 lastTileFromWall: _this.lastTileFromWallInput.checked,
                 lastAvailableTile: _this.lastAvailableTileInput.checked,
-                lastTileSpecial: _this.lastTileSpecialInput.checked
+                lastTileSpecial: _this.lastTileSpecialInput.checked,
+                specialSet: _this.specialSetInput.value
             });
         });
         return _this;
@@ -2464,12 +2550,19 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
 
             this.refreshHandContent();
 
+            /**
+             * @type {Hand}
+             */
             var hand = round.getHand(player).hand;
 
             this.isWinnerInput.checked = false;
             this.lastTileFromWallInput.checked = false;
             this.lastAvailableTileInput.checked = false;
             this.lastTileSpecialInput.checked = false;
+            this.specialSetInput.value = '';
+            Array.from(this.specialSetInput).forEach(function (i) {
+                return i.checked = false;
+            });
 
             if (hand) {
                 hand.sets.forEach(function (s) {
@@ -2482,6 +2575,10 @@ var HandCreatorView = (_dec = (0, _needlepoint.dependencies)((0, _templates.domL
                     this.lastTileFromWallInput.checked = round.lastTileFromWall;
                     this.lastAvailableTileInput.checked = round.lastAvailableTile;
                     this.lastTileSpecialInput.checked = round.lastTileSpecial;
+                }
+
+                if (hand.specialSet) {
+                    this.specialSetInput.value = hand.specialSet;
                 }
 
                 var score = round.scoreCalculator.calculateExtendedScore(round, player);

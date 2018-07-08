@@ -7,7 +7,7 @@ require('chai').use(require('sinon-chai'));
 
 import {EventEmitter} from "../js/utils";
 import {MahjongLilHelperMainViewController, MainAppUI} from "../js/app";
-import {Hand, Kong, Pung, Tiles} from "../js/hand";
+import {Hand, Kong, Pung, SpecialSets, Tiles} from "../js/hand";
 import {DomTemplate} from "../js/view/templates";
 import {HTMLDriver, loadTemplateHtml} from "./utils";
 
@@ -161,7 +161,7 @@ describe('Main App tests', () => {
             expect(appView.handCreator.showHand).calledWithExactly(round, game.players[2])
         });
 
-        it('app handles onEditFinish even', () => {
+        it('app handles onEditFinish event', () => {
             let app = getApp();
 
             round.setHand = sinon.fake();
@@ -181,6 +181,33 @@ describe('Main App tests', () => {
                 lastTileFromWall: true,
                 lastTileSpecial: true,
                 lastAvailableTile: true
+            });
+
+            expect(round.setHand).calledWith(game.players[2], expectedHand);
+            sinon.assert.notCalled(round.setWinner);
+            expect(appView.balanceTable.renderGameBalance).calledWithExactly(game);
+        });
+
+        it('app handles onEditFinish event with only special set checked', () => {
+            let app = getApp();
+
+            round.setHand = sinon.fake();
+            round.setWinner = sinon.fake();
+
+            let expectedHand = new Hand();
+            expectedHand.setSpecialSet(SpecialSets.major);
+
+            app.loadGame(game);
+
+            appView.handCreator.onEditFinish.emit({
+                round: round,
+                player: game.players[2],
+                tilesets: [],
+                isWinner: false,
+                lastTileFromWall: false,
+                lastTileSpecial: false,
+                lastAvailableTile: false,
+                specialSet: SpecialSets.major,
             });
 
             expect(round.setHand).calledWith(game.players[2], expectedHand);

@@ -20,6 +20,7 @@ import {MahjongDatabase} from "./db";
  * @property {boolean} lastTileFromWall
  * @property {boolean} lastAvailableTile
  * @property {boolean} lastTileSpecial
+ * @property {String} specialSet
  */
 
 /**
@@ -172,6 +173,10 @@ export class MahjongLilHelperMainViewController {
     handleHandEditFinish(event) {
         let hand = new Hand();
         event.tilesets.forEach(set => hand.addSet(set));
+
+        if(event.specialSet) {
+            hand.setSpecialSet(event.specialSet);
+        }
 
         event.round.setHand(event.player, hand);
         if(event.isWinner) {
