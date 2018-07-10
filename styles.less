@@ -118,6 +118,45 @@ img.tile {
     display: none;
 }
 
+.gamesList {
+    border: solid 1px black;
+
+    div:hover {
+        background: @hoverBackground;
+            cursor: pointer;
+    }
+
+    div div {
+        padding-left: 1rem;
+        padding-right: 1rem;
+        border-bottom: solid 1px black;
+        border-right: solid 1px black;
+    }
+
+    div:last-child div {
+        border-bottom: none;
+    }
+
+    div div:last-child {
+        border-right: none;
+    }
+
+    div div:first-child {
+        line-height: 3rem;
+        vertical-align: middle;
+    }
+
+    div div:nth-child(n+2) {
+        span {
+            display: block;
+
+            &:nth-child(2) {
+                text-align: right;
+            }
+        }
+    }
+}
+
 .gamesList li {
     list-style: none;
     cursor: pointer;

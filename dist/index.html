@@ -69,17 +69,29 @@
     <div>
         <h1>Mahjong Games List</h1>
         <button class="button">Utwórz nową grę</button>
-        <ul class="gamesList" data-slot="games"></ul>
+        <div class="gamesList" data-slot="games"></div>
     </div>
 
     <template data-name="gameRow">
-        <li>
-            Runda <span data-slot="roundNumber"></span>:
-                <span data-slot="player1Name"></span> (<span data-slot="player1Score"></span>),
-                <span data-slot="player2Name"></span> (<span data-slot="player2Score"></span>),
-                <span data-slot="player3Name"></span> (<span data-slot="player3Score"></span>),
-                <span data-slot="player4Name"></span> (<span data-slot="player4Score"></span>)
-        </li>
+        <div class="grid-x ">
+            <div class="cell auto">Runda <span data-slot="roundNumber"></span></div>
+            <div class="cell auto">
+                <span data-slot="player1Name"></span>
+                <span data-slot="player1Score"></span>
+            </div>
+            <div class="cell auto">
+                <span data-slot="player2Name"></span>
+                <span data-slot="player2Score"></span>
+            </div>
+            <div class="cell auto">
+                <span data-slot="player3Name"></span>
+                <span data-slot="player3Score"></span>
+            </div>
+            <div class="cell auto">
+                <span data-slot="player4Name"></span>
+                <span data-slot="player4Score"></span>
+            </div>
+        </div>
     </template>
 </template>
     <template data-name="hand">
@@ -100,7 +112,7 @@
         <button class="button small" data-action="addKong">Kong</button>
         <button class="button small" data-action="addTiles">Luźne kamienie</button>
     </div>
-    <div class="grid-x">
+    <div class="grid-x grid-margin-x">
       <div class="cell small-6">
           <h4>Zawartość ręki</h4>
           <div class="handContent clearfix"></div>
@@ -111,7 +123,7 @@
       </div>
     </div>
 
-    <div class="grid-x finishHandSection">
+    <div class="grid-x finishHandSection grid-margin-x">
         <div class="cell small-6">
             <h4>Zakończenie gry</h4>
             <label><input name="isWinner" type="checkbox"> Mahjong</label>

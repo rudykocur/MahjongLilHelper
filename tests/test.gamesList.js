@@ -64,9 +64,9 @@ describe('DOM: games list', () => {
         view.loadGames(games);
 
         expect(driver.getGameTitles()).to.be.eql([
-            'Runda 4: P1 (0), P2 (0), P3 (0), P4 (0)',
-            'Runda 2: P3 (-260), P1 (190), P4 (120), P2 (-50)',
-            'Runda 0: Rudy (0), Wojtas (0), Gohcia (0), Zxully (0)',
+            ['Runda 4','P1 0','P2 0','P3 0','P4 0'],
+            ['Runda 2','P3 -260','P1 190','P4 120','P2 -50'],
+            ['Runda 0','Rudy 0','Wojtas 0','Gohcia 0','Zxully 0'],
         ])
     });
 

@@ -528,7 +528,6 @@ var Player = function Player(seatNumber, name) {
 
 var Round = function () {
     /**
-     *
      * @param {Array<Player>} players
      * @param {Number} roundIndex
      * @param {Game} game
@@ -1205,12 +1204,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
     ctrl.view.mount(document.getElementById('mahjongContent'));
 
     ctrl.load();
-
-    ctrl.view.gameList.gameSelectedEvent.emit(ctrl.games[0]);
-    ctrl.view.balanceTable.onHandEditClick.emit({
-        round: ctrl.games[0].rounds[0],
-        player: ctrl.games[0].players[0]
-    });
 
     console.log('READY', ctrl);
 });

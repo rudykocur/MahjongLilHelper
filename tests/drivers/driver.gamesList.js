@@ -6,11 +6,13 @@ export class GamesListViewDriver extends HTMLDriver {
     }
 
     _getGamesRows() {
-        return Array.from(this.root.querySelectorAll('li'));
+        return Array.from(this.root.querySelectorAll('.gamesList > div'));
     }
 
     getGameTitles() {
-        return this._getGamesRows().map(node => normalize(node.textContent));
+        return this._getGamesRows().map(node => Array.from(node.querySelectorAll('div')).map(
+            div => normalize(div.textContent)
+        ));
     }
 
     clickGame(gameIndex) {
